@@ -14,7 +14,9 @@ def get_file_name(url):
         name of a file containing the downloaded webpage.
     """
     address = url.split('//')[1]
-    filename = ['-' if i.isalpha() or i.isdigit() else i for i in address]
+    filename = [
+        '-' if not i.isalpha() and not i.isdigit() else i for i in address
+    ]
     return ''.join(filename) + '.html'
 
 
@@ -31,14 +33,14 @@ def get_webpage_content(url):
     return request.text
 
 
-def write_to_file(filename, webpage_content):
+def write_to_file(filepath, webpage_content):
     """Write webpage content to file.
 
     Parameters:
         url: webpage url,
-        filename: filename to store webpage content.
+        filepath: path to file.
     """
-    with open(filename, 'w') as file_:
+    with open(filepath, 'w') as file_:
         file_.write(webpage_content)
 
 
@@ -54,7 +56,9 @@ def download(url, directory_path='current'):
     """
     webpage_content = get_webpage_content(url)
     filename = get_file_name(url)
-    write_to_file(filename, webpage_content)
+    print(url, filename)
     if directory_path == 'current':
         directory_path = os.getcwd()
-    return os.path.join(directory_path, filename)
+    filepath = os.path.join(directory_path, filename)
+    write_to_file(filepath, webpage_content)
+    return filepath

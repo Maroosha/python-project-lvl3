@@ -7,7 +7,7 @@ from page_loader.page_loader import download
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Webpage loader.')
+    parser = argparse.ArgumentParser(description='Webpage loader')
     parser.add_argument(
         '--output',
         default='current',  # current working directory
@@ -15,7 +15,7 @@ def main():
     )
     parser.add_argument('url')
     args = parser.parse_args()
-    print(download(args.output, args.url))
+    print(download(args.url, args.output))
 
 
 if __name__ == '__main__':
