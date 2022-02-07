@@ -11,7 +11,7 @@ def main():
     parser.add_argument(
         '--output',
         default='current',  # current working directory
-        help='download a webpage on your computer',
+        help='directory path',
     )
     parser.add_argument('url')
     args = parser.parse_args()
