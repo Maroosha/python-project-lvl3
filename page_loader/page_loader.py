@@ -56,7 +56,6 @@ def download(url, directory_path='current'):
     """
     webpage_content = get_webpage_content(url)
     filename = get_file_name(url)
-    print(url, filename)
     if directory_path == 'current':
         directory_path = os.getcwd()
     filepath = os.path.join(directory_path, filename)
