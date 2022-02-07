@@ -20,7 +20,7 @@ def read_file(filepath):
 
 
 def tests_page_loader_write_to_file():
-    "Test download function in page_loader module"
+    "Test write_to_file function in page_loader module"
     with tempfile.TemporaryDirectory() as temporary_directory:
         correct_answer = read_file('tests/fixtures/downloaded_website.html')
         webpage_content = get_webpage_content('https://page-loader.hexlet.repl.co')
