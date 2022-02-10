@@ -20,7 +20,7 @@ def read_file(filepath):
         return file_.read()
 
 
-def tests_get_directory_name():
+def test_get_directory_name():
     "Test get_directory_name function in page_loader module"
     name = get_name('https://page-loader.hexlet.repl.co')
     correct_answer = 'page-loader-hexlet-repl-co_files'
@@ -28,7 +28,7 @@ def tests_get_directory_name():
     assert received_filepath == correct_answer
 
 
-def tests_get_file_name():
+def test_get_file_name():
     "Test get_file_name function in page_loader module"
     name = get_name('https://page-loader.hexlet.repl.co')
     correct_answer = 'page-loader-hexlet-repl-co.html'
@@ -36,7 +36,7 @@ def tests_get_file_name():
     assert received_filepath == correct_answer
 
 
-def tests_write_to_file():
+def test_write_to_file():
     "Test write_to_file function in page_loader module"
     with tempfile.TemporaryDirectory() as temporary_directory:
         directory_path = os.path.join(
@@ -55,7 +55,7 @@ def tests_write_to_file():
         assert received == correct_answer
 
 
-def tests_download():
+def test_download():
     "Test download function in page_loader module"
     with tempfile.TemporaryDirectory() as temporary_directory:
         correct_answer = read_file('tests/fixtures/downloaded_website.html')
