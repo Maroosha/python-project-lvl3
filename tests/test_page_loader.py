@@ -39,16 +39,11 @@ def test_get_file_name():
 def test_write_to_file():
     "Test write_to_file function in page_loader module"
     with tempfile.TemporaryDirectory() as temporary_directory:
-        directory_path = os.path.join(
-            temporary_directory,
-            get_directory_name(get_name('https://page-loader.hexlet.repl.co')),
-        )
-        os.mkdir(directory_path)
         correct_answer = read_file('tests/fixtures/original_website.html')
         webpage_content = get_webpage_contents('https://page-loader.hexlet.repl.co')
         filepath = os.path.join(
             temporary_directory,
-            'page-loader-hexlet-repl-co_files/page-loader-hexlet-repl-co.html',
+            'page-loader-hexlet-repl-co.html',
         )
         write_to_file(filepath, webpage_content)
         received = read_file(filepath)
@@ -60,21 +55,23 @@ def test_download():
     with tempfile.TemporaryDirectory() as temporary_directory:
         correct_answer = read_file('tests/fixtures/downloaded_website.html')
         download('https://page-loader.hexlet.repl.co', temporary_directory)
-        directory_path = os.path.join(
+        received = read_file(os.path.join(
+            temporary_directory,
+            'page-loader-hexlet-repl-co.html',
+        ))  # HTML file
+
+        directorypath_files = os.path.join(
             temporary_directory,
             get_directory_name(get_name('https://page-loader.hexlet.repl.co')),
-        )
+        )  # folder for supporting files
         # check if 'page-loader-hexlet-repl-co_files' already exists
-        if not os.path.isdir(directory_path):
-            os.mkdir(directory_path)
-        received = read_file(os.path.join(
-            directory_path,
-            'page-loader-hexlet-repl-co.html',
-        ))
+        if not os.path.isdir(directorypath_files):
+            os.mkdir(directorypath_files)
+
         assert received == correct_answer
         assert os.path.isfile(
             os.path.join(
-                directory_path,
+                directorypath_files,
                 'page-loader-hexlet-repl-co-assets-professions-nodejs.png',
             )
         )
