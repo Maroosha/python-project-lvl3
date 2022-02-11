@@ -10,4 +10,4 @@
 [![asciicast](https://asciinema.org/a/467416.svg)](https://asciinema.org/a/467416)
 
 ### Download a webpage and all the images 
-[![asciicast](https://asciinema.org/a/468118.svg)](https://asciinema.org/a/468118)
+[![asciicast](https://asciinema.org/a/468312.svg)](https://asciinema.org/a/468312)
