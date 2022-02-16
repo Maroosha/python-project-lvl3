@@ -91,7 +91,7 @@ def download_image(url, path_to_directory, list_of_images):
     Parameters:
         url: website url,
         path_to_directory: path to the dir where the image will be stored,
-        list_of_images: list of image sources
+        list_of_images: list of images.
 
     Returns:
         list of relative pathes to images.
@@ -116,38 +116,21 @@ def download_image(url, path_to_directory, list_of_images):
 
 
 def download_link(url, path_to_directory, list_of_links):
-    "DOCSTR"
+    """Download resources from 'link' tag.
+
+    Parameters:
+        url: website url,
+        path_to_directory: path to the dir where the image will be stored,
+        list_of_links: list of links.
+
+    Returns:
+        list of relative pathes to links.
+    """
     list_of_links_relative_pathes = []
     for link in list_of_links:
-        link_parse = urlparse(link)
-
-        if Path(link).suffix: # link = '/assets/professions/nodejs.png'
-            src = link[:-len(Path(link).suffix)]
-            suffix = Path(link).suffix
-        else:
-            src = link # src = '/assets/professions/nodejs'
-            suffix = '.html'
-        if link_parse.scheme:
-            src = src[len(link_parse.scheme) + 3:]
-            source_name = ''.join([
-                '-' if not i.isalpha() and not i.isdigit() else i for i in src
-            ])  # -assets-professions-nodejs
-            filename = source_name + suffix
-        else:
-            source_name = ''.join([
-                '-' if not i.isalpha() and not i.isdigit() else i for i in src
-            ])  # -assets-professions-nodejs
-            filename = get_name(url) + source_name + suffix
+        filename = get_source_name(url, link)
         filepath = os.path.join(path_to_directory, filename)
-
-        if link_parse.netloc:
-            webpage_content = get_webpage_contents(link)
-            write_to_file(filepath, webpage_content)
-        else:
-            webpage_content = requests.get(url + link).content
-            with open(filepath, 'wb+') as file_:
-                file_.write(webpage_content)
-
+        write_source_content_to_file(url, link, filepath)
         relative_path_to_link = (
             f'{get_directory_name(get_name(url))}/{filename}'
         )
@@ -156,57 +139,155 @@ def download_link(url, path_to_directory, list_of_links):
 
 
 def download_script(url, path_to_directory, list_of_scripts):
-    "DOCSTR"
+    """Download resources from 'script' tag if there is 'src' attribute.
+
+    Parameters:
+        url: website url,
+        path_to_directory: path to the dir where the image will be stored,
+        list_of_images: list of scripts.
+
+    Returns:
+        list of relative pathes to scripts.
+    """
     list_of_scripts_relative_pathes = []
-
     for script_src in list_of_scripts:
-        script_src_parse = urlparse(script_src)
-
-#        if Path(script_src).suffix: # link = '/assets/professions/nodejs.png'
-#            src = script_src[:-len(Path(script_src).suffix)]
-#            suffix = Path(script_src).suffix
-#        else:
-#            src = script_src # src = '/assets/professions/nodejs'
-#            suffix = '.html'
-#        source_name = ''.join([
-#            '-' if not i.isalpha() and not i.isdigit() else i for i in src
-#        ])  # -assets-professions-nodejs
-#        filename = get_name(url) + source_name + suffix
-#        filepath = os.path.join(path_to_directory, filename)
-
-        if Path(script_src).suffix: # link = '/assets/professions/nodejs.png'
-            src = script_src[:-len(Path(script_src).suffix)]
-            suffix = Path(script_src).suffix
-        else:
-            src = script_src # src = '/assets/professions/nodejs'
-            suffix = '.html'
-        if script_src_parse.scheme:
-            src = src[len(script_src_parse.scheme) + 3:]
-            source_name = ''.join([
-                '-' if not i.isalpha() and not i.isdigit() else i for i in src
-            ])  # -assets-professions-nodejs
-            filename = source_name + suffix
-        else:
-            source_name = ''.join([
-                '-' if not i.isalpha() and not i.isdigit() else i for i in src
-            ])  # -assets-professions-nodejs
-            filename = get_name(url) + source_name + suffix
+        filename = get_source_name(url, script_src)
         filepath = os.path.join(path_to_directory, filename)
-
-        if script_src_parse.netloc:
-            webpage_content = get_webpage_contents(script_src)
-            write_to_file(filepath, webpage_content)
-        else:
-            webpage_content = requests.get(url + script_src).content
-            with open(filepath, 'wb+') as file_:
-                file_.write(webpage_content)
-
+        write_source_content_to_file(url, script_src, filepath)
         relative_path_to_link = (
             f'{get_directory_name(get_name(url))}/{filename}'
         )
         list_of_scripts_relative_pathes.append(relative_path_to_link)
-
     return list_of_scripts_relative_pathes
+
+
+def get_source_name(url, source):
+    """Get name of the link/script source (filename).
+
+    Parameters:
+        url: website url,
+        source: source link.
+
+    Returns:
+        name of the source.
+    """
+    source_parse = urlparse(source)
+    if Path(source).suffix:  # link = '/assets/professions/nodejs.png'
+        src = source[:-len(Path(source).suffix)]
+        suffix = Path(source).suffix
+    else:
+        src = source  # src = '/assets/professions/nodejs'
+        suffix = '.html'
+    if source_parse.scheme:
+        src = src[len(source_parse.scheme) + 3:]
+        name = ''.join([
+            '-' if not i.isalpha() and not i.isdigit() else i for i in src
+        ])  # -assets-professions-nodejs
+        source_name = name + suffix
+    else:
+        name = ''.join([
+            '-' if not i.isalpha() and not i.isdigit() else i for i in src
+        ])  # -assets-professions-nodejs
+        source_name = get_name(url) + name + suffix
+    return source_name
+
+
+def write_source_content_to_file(url, source, filepath):
+    """Write 'link' or 'source' tags contents into file.
+
+    Parameters:
+        url: website url,
+        source: source link,
+        filepath: path to file.
+    """
+    source_parse = urlparse(source)
+    if source_parse.netloc:
+        webpage_content = get_webpage_contents(source)
+        write_to_file(filepath, webpage_content)
+    else:
+        webpage_content = requests.get(url + source).content
+        with open(filepath, 'wb+') as file_:
+            file_.write(webpage_content)
+
+
+def get_images(file_contents):
+    """Get images info.
+
+    Parameters:
+        file_contents: bs4-ed webpage contents.
+
+    Returns:
+        images from bs4 and list of image pathes.
+    """
+    images = file_contents.find_all('img')
+    list_of_images = []
+    for image in images:
+        list_of_images.append(image.get('src'))
+    return images, list_of_images
+
+
+def get_links(file_contents):
+    """Get links info.
+
+    Parameters:
+        file_contents: bs4-ed webpage contents.
+
+    Returns:
+        links from bs4 and list of links pathes.
+    """
+    list_of_links = []
+    links = file_contents.find_all('link')
+    for link in links:
+        href = link.get('href')
+        if is_local(href):
+            list_of_links.append(href)
+    return links, list_of_links
+
+
+def get_scripts(file_contents):
+    """Get scripts info.
+
+    Parameters:
+        file_contents: bs4-ed webpage contents.
+
+    Returns:
+        scripts from bs4 and list of scripts pathes.
+    """
+    list_of_scripts = []
+    scripts = file_contents.find_all('script')
+    for script in scripts:
+        src = script.get('src')
+        if is_local(src) and script['src']:
+            list_of_scripts.append(src)
+    return scripts, list_of_scripts
+
+
+def replace_image_pathes(images, list_of_images, relative_pathes):
+    """Replace image pathes with their relative pathes.
+
+    Parameters:
+        images: bs4-ed images,
+        list_of_images: path to an image,
+        relative_pathes: relative pathe to an image.
+    """
+    hash_table = dict(zip(list_of_images, relative_pathes))
+    for source in images:
+        source['src'] = hash_table[source['src']]
+
+
+def replace_pathes(sources, list_of_sources, relative_pathes, attribute):
+    """Replace links/sources pathes with their relative pathes.
+
+    Parameters:
+        source: bs4-ed links/sources,
+        list_of_images: path to a link/source,
+        relative_pathes: relative pathe to a link/source.
+    """
+    hash_table = dict(zip(list_of_sources, relative_pathes))
+    for source in sources:
+        attr = source.get(attribute)
+        if attr in hash_table:
+            source[attribute] = hash_table[source[attribute]]
 
 
 def download(url, directory_path='current'):
@@ -220,7 +301,6 @@ def download(url, directory_path='current'):
     filename = get_file_name(get_name(url))
     if directory_path == 'current':
         directory_path = os.getcwd()
-    # filepath for a future HTML file
     filepath = os.path.join(directory_path, filename)
 
     # create a dicrecotry for files
@@ -228,48 +308,36 @@ def download(url, directory_path='current'):
     directorypath_files = os.path.join(directory_path, directoryname_files)
     os.mkdir(directorypath_files)  # path/to/webpage-url_files
 
+    # parse webpage contents
     file_contents = BeautifulSoup(webpage_content, 'html.parser')
-    images = file_contents.find_all('img')  # find all the images
-    list_of_images = []
-    for source in images:
-        list_of_images.append(source.get('src'))  # get image sources
+    images, list_of_images = get_images(file_contents)
+    links, list_of_links = get_links(file_contents)
+    scripts, list_of_scripts = get_scripts(file_contents)
 
-    list_of_links = []
-    links = file_contents.find_all('link')  # find all the links
-    for link in links:
-        href = link.get('href')
-        if is_local(href):  # checking if it is local
-            list_of_links.append(href)  # get links sources
+    # download all the files and return list of pathes to them:
+    list_of_image_relative_pathes = download_image(
+        url,
+        directorypath_files,
+        list_of_images,
+    )
+    list_of_links_relative_pathes = download_link(
+        url,
+        directorypath_files,
+        list_of_links,
+    )
+    list_of_scripts_relative_pathes = download_script(
+        url,
+        directorypath_files,
+        list_of_scripts,
+    )
 
-    list_of_scripts = []
-    scripts = file_contents.find_all('script')  # find all the scripts: with and without 'src'
-    for script in scripts:
-        src = script.get('src')
-        if is_local(src) and script['src']:
-            list_of_scripts.append(src)  # get scripts sources
+    # replace relative pathes (imgs, links, scripts[src]) in webpage contents
+    replace_image_pathes(images, list_of_images, list_of_image_relative_pathes)
+    replace_pathes(links, list_of_links, list_of_links_relative_pathes, 'href')
+    replace_pathes(
+        scripts, list_of_scripts, list_of_scripts_relative_pathes, 'src',
+    )
 
-
-    # download all the files AND return list of pathes to them:
-    list_of_image_relative_pathes = download_image(url, directorypath_files,  list_of_images)
-    list_of_links_relative_pathes = download_link(url, directorypath_files, list_of_links)
-    list_of_scripts_relative_pathes = download_script(url, directorypath_files, list_of_scripts)
-
-    images_hash_table = dict(zip(list_of_images, list_of_image_relative_pathes))
-    for source in images:
-        source['src'] = images_hash_table[source['src']]
-
-    links_hash_table = dict(zip(list_of_links, list_of_links_relative_pathes))
-    for link in links:
-        href = link.get('href')
-        if href in links_hash_table:
-            link['href'] = links_hash_table[link['href']]
-
-    scripts_hash_table = dict(zip(list_of_scripts, list_of_scripts_relative_pathes))
-    for script in scripts:
-        src = script.get('src')
-        if src in scripts_hash_table:
-            script['src'] = scripts_hash_table[script['src']]
-
-    write_to_file(filepath, file_contents.prettify())  # creating an HTML file
+    write_to_file(filepath, file_contents.prettify())
 
     return filepath
