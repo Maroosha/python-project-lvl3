@@ -11,3 +11,6 @@
 
 ### Download a webpage and all the images 
 [![asciicast](https://asciinema.org/a/468312.svg)](https://asciinema.org/a/468312)
+
+### Download a webpage and all local resources from 'img', 'link', 'script' tabs
+[![asciicast](https://asciinema.org/a/469467.svg)](https://asciinema.org/a/469467)
