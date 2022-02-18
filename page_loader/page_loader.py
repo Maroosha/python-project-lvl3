@@ -1,5 +1,6 @@
 "Download a webpage into a folder."
 
+import logging
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -67,8 +68,11 @@ def write_to_file(filepath, webpage_content):
         url: webpage url,
         filepath: path to file.
     """
-    with open(filepath, 'w') as file_:
-        file_.write(webpage_content)
+    try:
+        with open(filepath, 'w') as file_:
+            file_.write(webpage_content)
+    except OSError:
+        logging.error('Unable to write to file %s.', filepath)
 
 
 def is_local(url):
@@ -298,38 +302,51 @@ def download(url, directory_path='current'):
         url: url of a webpage to be downloaded.
     """
     webpage_content = get_webpage_contents(url)
+    logging.debug('Webpage contents retrieved.')
     filename = get_file_name(get_name(url))
     if directory_path == 'current':
         directory_path = os.getcwd()
     filepath = os.path.join(directory_path, filename)
+    logging.info('Webpage contents will be stored in %s.', filepath)
 
     # create a dicrecotry for files
     directoryname_files = get_directory_name(get_name(url))
     directorypath_files = os.path.join(directory_path, directoryname_files)
-    os.mkdir(directorypath_files)  # path/to/webpage-url_files
+    try:
+        os.mkdir(directorypath_files)  # path/to/webpage-url_files
+    except OSError:
+        logging.exception('Unable to create directory %s.', directorypath_files)
+    logging.info('Downloaded files will be stored in %s.', directorypath_files)
 
     # parse webpage contents
     file_contents = BeautifulSoup(webpage_content, 'html.parser')
+    logging.debug('Webpage contents is being parsed...')
     images, list_of_images = get_images(file_contents)
     links, list_of_links = get_links(file_contents)
     scripts, list_of_scripts = get_scripts(file_contents)
 
     # download all the files and return list of pathes to them:
+    logging.debug('Images are being downloaded...')
     list_of_image_relative_pathes = download_image(
         url,
         directorypath_files,
         list_of_images,
     )
+    logging.info('Images successfully downloaded.')
+    logging.debug('Sources are being downloaded...')  # links???
     list_of_links_relative_pathes = download_link(
         url,
         directorypath_files,
         list_of_links,
     )
+    logging.info('Sources successfully downloaded.')  # or links???
+    logging.debug('Scripts are being downloaded...')
     list_of_scripts_relative_pathes = download_script(
         url,
         directorypath_files,
         list_of_scripts,
     )
+    logging.info('Scripts successfully downloaded.')
 
     # replace relative pathes (imgs, links, scripts[src]) in webpage contents
     replace_image_pathes(images, list_of_images, list_of_image_relative_pathes)
@@ -339,5 +356,8 @@ def download(url, directory_path='current'):
     )
 
     write_to_file(filepath, file_contents.prettify())
+    logging.info('Webpage contents successfully saved in %s.', filepath)
 
+    print(f'Webpage contents successfully saved in \
+{filepath} and {directorypath_files}.')
     return filepath

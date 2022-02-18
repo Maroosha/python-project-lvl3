@@ -14,3 +14,6 @@
 
 ### Download a webpage and all local resources from 'img', 'link', 'script' tabs
 [![asciicast](https://asciinema.org/a/469467.svg)](https://asciinema.org/a/469467)
+
+### Add logging
+[![asciicast](https://asciinema.org/a/470018.svg)](https://asciinema.org/a/470018)
