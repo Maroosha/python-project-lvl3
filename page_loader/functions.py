@@ -4,6 +4,7 @@ from pathlib import Path
 import requests
 from urllib.parse import urlparse
 
+
 def get_name(url):
     """Derive a name of a directory or file from an url.
 
