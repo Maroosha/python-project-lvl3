@@ -1,7 +1,8 @@
-from page_loader.page_loader import download, get_file_name
-from page_loader.page_loader import get_directory_name, get_name
-from page_loader.page_loader import get_webpage_contents
-from page_loader.page_loader import write_to_file
+from page_loader.page_loader import download
+from page_loader.functions import get_file_name
+from page_loader.functions import get_directory_name, get_name
+from page_loader.functions import get_webpage_contents
+from page_loader.functions import write_to_file
 import requests_mock
 import tempfile
 import os
