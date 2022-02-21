@@ -8,6 +8,11 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 
+class KnownError(Exception):
+    "Some known error."
+    pass
+
+
 def get_name(url):
     """Derive a name of a directory or file from an url.
 
