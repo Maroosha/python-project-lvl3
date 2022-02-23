@@ -1,3 +1,5 @@
+"Auxilary functions for page_loader.py."
+
 import logging
 import os
 from pathlib import Path
@@ -68,8 +70,14 @@ def write_to_file(filepath, webpage_content):
     try:
         with open(filepath, 'w') as file_:
             file_.write(webpage_content)
-    except OSError:
+    except PermissionError as error1:
+        print(f'Access denied to file {filepath}.')
+        logging.error('Access denied to file %s.', filepath)
+        raise error1
+    except OSError as error2:
+        print(f'Unable to write to file {filepath}.')
         logging.error('Unable to write to file %s.', filepath)
+        raise error2
 
 
 def is_local(url):
@@ -107,8 +115,17 @@ def download_image(url, path_to_directory, list_of_images):
         ])  # -assets-professions-nodejs
         image_name = get_name(url) + source_name + Path(source).suffix
         path_to_image = os.path.join(path_to_directory, image_name)
-        with open(path_to_image, 'wb+') as img:
-            img.write(r)
+        try:
+            with open(path_to_image, 'wb+') as img:
+                img.write(r)
+        except PermissionError as error1:
+            print(f'Access denied to file {path_to_image}.')
+            logging.error('Access denied to file %s.', path_to_image)
+            raise error1
+        except OSError as error2:
+            print(f'Unable to save data to {path_to_image}.')
+            logging.error('Unable to save an image as %s.', path_to_image)
+            raise error2
         relative_path_to_image = (
             f'{get_directory_name(get_name(url))}/{image_name}'
         )
@@ -131,7 +148,16 @@ def download_link(url, path_to_directory, list_of_links):
     for link in list_of_links:
         filename = get_source_name(url, link)
         filepath = os.path.join(path_to_directory, filename)
-        write_source_content_to_file(url, link, filepath)
+        try:
+            write_source_content_to_file(url, link, filepath)
+        except PermissionError as error1:
+            print(f'Access denied to file {filepath}.')
+            logging.error('Access denied to file %s.', filepath)
+            raise error1
+        except OSError as error2:
+            print(f'Unable to save data to {filepath}.')
+            logging.error('Unable to save data to %s.', filepath)
+            raise error2
         relative_path_to_link = (
             f'{get_directory_name(get_name(url))}/{filename}'
         )
@@ -154,7 +180,16 @@ def download_script(url, path_to_directory, list_of_scripts):
     for script_src in list_of_scripts:
         filename = get_source_name(url, script_src)
         filepath = os.path.join(path_to_directory, filename)
-        write_source_content_to_file(url, script_src, filepath)
+        try:
+            write_source_content_to_file(url, script_src, filepath)
+        except PermissionError as error1:
+            print(f'Access denied to file {filepath}.')
+            logging.error('Access denied to file %s.', filepath)
+            raise error1
+        except OSError as error2:
+            print(f'Unable to save data to {filepath}.')
+            logging.error('Unable to save data to %s.', filepath)
+            raise error2
         relative_path_to_link = (
             f'{get_directory_name(get_name(url))}/{filename}'
         )

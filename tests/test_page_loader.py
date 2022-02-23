@@ -1,9 +1,13 @@
+from urllib.error import HTTPError
 from page_loader.page_loader import download
 from page_loader.functions import get_file_name
 from page_loader.functions import get_directory_name, get_name
 from page_loader.functions import get_webpage_contents
 from page_loader.functions import write_to_file
+import logging
 import requests_mock
+import requests
+import pytest
 import tempfile
 import os
 
@@ -82,7 +86,7 @@ def test_download():
                 text=read_file('tests/fixtures/mocks/sub_html.html'),
             )
 
-            download('https://ru.hexlet.io', temporary_directory)
+            filepath = download('https://ru.hexlet.io', temporary_directory)
             received = read_file(os.path.join(
                 temporary_directory,
                 'ru-hexlet-io.html',
@@ -96,6 +100,7 @@ def test_download():
             if not os.path.isdir(directorypath_files):
                 os.mkdir(directorypath_files)
 
+            assert os.path.exists(filepath)
             assert received == correct_answer
             assert os.path.isfile(
                     os.path.join(
@@ -121,3 +126,21 @@ def test_download():
                     'ru-hexlet-io-courses.html',
                 )
             )
+
+
+
+def test_for_http_errors():
+    "Testing for HTTP errors."
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        with requests_mock.Mocker() as mock:
+            # Note to self:
+            # register_uri() takes the HTTP method, the URI and then information
+            # that is used to build the response.
+            mock.register_uri('GET', 'https://ru.hexlet.io', exc=requests.HTTPError)
+            # exc = An exception that will be raised instead of returning a response.
+            # see https://requests-mock.readthedocs.io/en/latest/response.html
+            # see +
+            # https://stackoverflow.com/questions/19342111/get-http-error-code-from-requests-exceptions-httperror
+            with pytest.raises(requests.HTTPError) as exc_info:
+                download('https://ru.hexlet.io', temporary_directory)
+            assert exc_info.type is requests.HTTPError

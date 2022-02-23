@@ -26,12 +26,11 @@ def main():
     except IOError as unknown_error:
         logging.error(unknown_error)
         print('ATTENTION: An unexpected error occured. \
-            For details, see %s.', LOG_FILE)
+For details, see %s.', LOG_FILE)
         sys.exit(1)
     except KnownError as known_error:
         logging.error(known_error)
-        print('ATTENTION: An error occured. \
-            For details, see %s.', LOG_FILE)
+        print('ATTENTION: An error occured: %s.', known_error)
         sys.exit(1)
 
 

@@ -31,8 +31,17 @@ def download(url, directory_path='current'):
     directorypath_files = os.path.join(directory_path, directoryname_files)
     try:
         os.mkdir(directorypath_files)  # path/to/webpage-url_files
-    except OSError:
-        logging.exception('Unable to create directory %s.', directorypath_files)
+    except FileNotFoundError as not_found:
+        print(f'No such file or directory: {directorypath_files}')
+        logging.exception('No such file or directory: %s', directorypath_files)
+        raise not_found
+    except OSError as err:
+        print(f'Directory {directorypath_files} already exists.')
+        logging.exception(
+            'Directory %s since exists.',
+            directorypath_files,
+        )
+        raise err
     logging.info('Downloaded files will be stored in %s.', directorypath_files)
 
     # parse webpage contents
@@ -84,6 +93,5 @@ def download(url, directory_path='current'):
     functions.write_to_file(filepath, file_contents.prettify())
     logging.info('Webpage contents successfully saved in %s.', filepath)
 
-    print(f'Webpage contents successfully saved in \
-{filepath} and {directorypath_files}.')
+    print(f'Webpage contents has been successfully saved in {directory_path}.')
     return filepath

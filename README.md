@@ -17,3 +17,6 @@
 
 ### Add logging
 [![asciicast](https://asciinema.org/a/470018.svg)](https://asciinema.org/a/470018)
+
+### Webpage download with errors present
+[![asciicast](https://asciinema.org/a/471166.svg)](https://asciinema.org/a/471166)
