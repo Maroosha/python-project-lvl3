@@ -15,7 +15,12 @@ def main():
     "."
     parser = argparse.ArgumentParser(description='Webpage loader')
     parser.add_argument(
-        '--output',
+        '-v', '--version',
+        action='version',
+        version='%(prog)s 1.0',
+    )
+    parser.add_argument(
+        '-o', '--output',
         default='current',  # current working directory
         help='directory path',
     )

@@ -20,3 +20,6 @@
 
 ### Webpage download with errors present
 [![asciicast](https://asciinema.org/a/471166.svg)](https://asciinema.org/a/471166)
+
+### Project demo
+[![asciicast](https://asciinema.org/a/471757.svg)](https://asciinema.org/a/471757)
