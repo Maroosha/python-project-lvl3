@@ -4,6 +4,9 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/Maroosha/python-project-lvl3/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage)](https://codeclimate.com/github/Maroosha/python-project-lvl3/test_coverage)
 
+<h3>Package description</h3>
+Download a webpage and supporting files (images, scripts and enclosed links).
+
 ## Demo
 
 ### Download a webpage
