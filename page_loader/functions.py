@@ -2,10 +2,15 @@
 
 import logging
 import os
+import requests
 from pathlib import Path
 from progress.bar import IncrementalBar
-import requests
 from urllib.parse import urlparse
+
+
+class KnownError(Exception):
+    "Some known error."
+    pass
 
 
 def get_name(url):
@@ -57,7 +62,12 @@ def get_webpage_contents(url):
     Returns:
         webpage content.
     """
-    request = requests.get(url)
+    try:
+        request = requests.get(url)
+    except requests.exceptions.HTTPError as exc:
+        logging.error(exc)
+        raise KnownError(f"Can't connect with a webpage. \
+Status code: {requests.get(url).status_code}") from exc
     return request.text
 
 

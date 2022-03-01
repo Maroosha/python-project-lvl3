@@ -6,11 +6,6 @@ import page_loader.functions as functions
 from bs4 import BeautifulSoup
 
 
-class KnownError(Exception):
-    "Some known error."
-    pass
-
-
 def download(url, directory_path='current'):
     """Get path to file with a saved webpage.
 

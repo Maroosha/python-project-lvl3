@@ -1,10 +1,11 @@
 from urllib.error import HTTPError
+from urllib.parse import urljoin
 from page_loader.page_loader import download
 from page_loader.functions import get_file_name
 from page_loader.functions import get_directory_name, get_name
 from page_loader.functions import get_webpage_contents
 from page_loader.functions import write_to_file
-import logging
+# import logging
 import requests_mock
 import requests
 import pytest
@@ -128,9 +129,8 @@ def test_download():
             )
 
 
-
 def test_for_http_errors():
-    "Testing for HTTP errors."
+    "Test for HTTP errors."
     with tempfile.TemporaryDirectory() as temporary_directory:
         with requests_mock.Mocker() as mock:
             # Note to self:
@@ -144,3 +144,13 @@ def test_for_http_errors():
             with pytest.raises(requests.HTTPError) as exc_info:
                 download('https://ru.hexlet.io', temporary_directory)
             assert exc_info.type is requests.HTTPError
+
+
+@pytest.mark.parametrize('code', [403, 404, 500])
+def test_repsonse_with_error(requests_mock, code):
+    "Test for 404 and 500 status codes."
+    url = urljoin('https://ru.hexlet.io', str(code))
+    requests_mock.get(url, status_code=code)
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        with pytest.raises(Exception):
+            assert download(url, temporary_directory)
