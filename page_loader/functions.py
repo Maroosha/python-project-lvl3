@@ -140,7 +140,7 @@ def download_image(url, path_to_directory, list_of_images):
             print(f'Unable to save data to {path_to_image}.')
             logging.error('Unable to save an image as %s.', path_to_image)
             raise error2
-        print(path_to_image)
+        logging.debug('Path_to_image: %s', path_to_image)
         relative_path_to_image = (
             f'{get_directory_name(get_name(url))}/{image_name}'
         )
