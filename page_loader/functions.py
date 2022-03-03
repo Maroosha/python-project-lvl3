@@ -119,6 +119,7 @@ def download_image(url, path_to_directory, list_of_images):
     """
     list_of_image_relative_pathes = []
     for source in list_of_images:  # source = '/assets/professions/nodejs.png'
+        logging.debug(f'Downloading {url}, {source}')
         r = requests.get(url + source).content
         src = source[:-len(Path(source).suffix)]
         # src = '/assets/professions/nodejs'
@@ -284,6 +285,7 @@ def get_images(file_contents):
     list_of_images = []
     for image in images:
         list_of_images.append(image.get('src'))
+        logging.debug('list of images: %s', list_of_images)
     return images, list_of_images
 
 
