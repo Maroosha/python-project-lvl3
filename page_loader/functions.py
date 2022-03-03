@@ -64,6 +64,7 @@ def get_webpage_contents(url):
     """
     try:
         request = requests.get(url)
+        request.raise_for_status()
     except requests.exceptions.HTTPError as exc:
         logging.error(exc)
         raise KnownError(f"Can't connect with a webpage. \
