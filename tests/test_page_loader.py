@@ -79,8 +79,9 @@ def test_download():
                 text=read_file('tests/fixtures/mocks/js_file.js'),
             )
             mock.get(
-                'https://ru.hexlet.io/assets/professions/nodejs.png'),
-#            )
+                'https://ru.hexlet.io/assets/professions/nodejs.png',
+                content=read_file('tests/fixtures/mocks/nodejs.png', 'rb'),
+            )
             mock.get(
                 'https://ru.hexlet.io/courses',
                 text=read_file('tests/fixtures/mocks/sub_html.html'),
