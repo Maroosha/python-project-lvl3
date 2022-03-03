@@ -47,13 +47,6 @@ def download(url, directory_path='current'):
     scripts, list_of_scripts = functions.get_scripts(file_contents)
 
     # download all the files and return list of pathes to them:
-    logging.debug('Images are being downloaded...')
-    list_of_image_relative_pathes = functions.download_image(
-        url,
-        directorypath_files,
-        list_of_images,
-    )
-    logging.info('Images successfully downloaded.')
     logging.debug('Sources are being downloaded...')  # links???
     list_of_links_relative_pathes = functions.download_link(
         url,
@@ -61,6 +54,13 @@ def download(url, directory_path='current'):
         list_of_links,
     )
     logging.info('Sources successfully downloaded.')  # or links???
+    logging.debug('Images are being downloaded...')
+    list_of_image_relative_pathes = functions.download_image(
+        url,
+        directorypath_files,
+        list_of_images,
+    )
+    logging.info('Images successfully downloaded.')
     logging.debug('Scripts are being downloaded...')
     list_of_scripts_relative_pathes = functions.download_script(
         url,
