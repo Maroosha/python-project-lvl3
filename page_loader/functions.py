@@ -164,6 +164,7 @@ def download_link(url, path_to_directory, list_of_links):
     """
     list_of_links_relative_pathes = []
     for link in list_of_links:
+        logging.debug(f'Downloading {url}, {link}')
         filename = get_source_name(url, link)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
@@ -178,6 +179,7 @@ def download_link(url, path_to_directory, list_of_links):
             print(f'Unable to save data to {filepath}.')
             logging.error('Unable to save data to %s.', filepath)
             raise error2
+        logging.debug('Path_to_link: %s', filepath)
         relative_path_to_link = (
             f'{get_directory_name(get_name(url))}/{filename}'
         )
@@ -285,7 +287,7 @@ def get_images(file_contents):
     list_of_images = []
     for image in images:
         list_of_images.append(image.get('src'))
-        logging.debug('list of images: %s', list_of_images)
+    logging.debug('list of images: %s', list_of_images)
     return images, list_of_images
 
 
@@ -304,6 +306,7 @@ def get_links(file_contents):
         href = link.get('href')
         if is_local(href):
             list_of_links.append(href)
+    logging.debug('list of links: %s', list_of_links)
     return links, list_of_links
 
 
