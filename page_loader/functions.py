@@ -164,7 +164,7 @@ def download_link(url, path_to_directory, list_of_links):
     """
     list_of_links_relative_pathes = []
     for link in list_of_links:
-        logging.debug(f'Downloading {url}, {link}')
+        logging.debug(f'Downloading {url + link}')
         filename = get_source_name(url, link)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
