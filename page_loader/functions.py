@@ -13,7 +13,7 @@ class KnownError(Exception):
     pass
 
 
-def get_name(url):
+def get_name(url):  # FINE
     """Derive a name of a directory or file from an url.
 
     Parameters:
@@ -67,7 +67,7 @@ def get_webpage_contents(url):
         request.raise_for_status()
     except requests.exceptions.HTTPError as exc:
         logging.error(exc)
-        raise KnownError(f"Can't connect with a webpage. \
+        raise KnownError(f"Connection failed. \
 Status code: {requests.get(url).status_code}") from exc
     return request.text
 
@@ -283,10 +283,13 @@ def get_images(file_contents):
     Returns:
         images from bs4 and list of image pathes.
     """
-    images = file_contents.find_all('img')
     list_of_images = []
+    images = file_contents.find_all('img')
+    logging.debug(f'file_contents.find_all("img"): \
+{file_contents.find_all("img")}')
     for image in images:
         list_of_images.append(image.get('src'))
+        logging.debug(F'image: {image.get("src")}')
     logging.debug('list of images: %s', list_of_images)
     return images, list_of_images
 
@@ -302,10 +305,13 @@ def get_links(file_contents):
     """
     list_of_links = []
     links = file_contents.find_all('link')
+    logging.debug(f'file_contents.find_all("link"): \
+{file_contents.find_all("link")}')
     for link in links:
         href = link.get('href')
         if is_local(href):
             list_of_links.append(href)
+            logging.debug(F'link: {link.get("link")}')
     logging.debug('list of links: %s', list_of_links)
     return links, list_of_links
 
@@ -321,10 +327,14 @@ def get_scripts(file_contents):
     """
     list_of_scripts = []
     scripts = file_contents.find_all('script')
+    logging.debug(f'file_contents.find_all("script"): \
+{file_contents.find_all("script")}')
     for script in scripts:
         src = script.get('src')
         if is_local(src) and script['src']:
             list_of_scripts.append(src)
+            logging.debug(F'sript: {src}')
+    logging.debug('list of scripts: %s', list_of_scripts)
     return scripts, list_of_scripts
 
 
