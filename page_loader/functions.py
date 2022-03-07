@@ -89,6 +89,12 @@ Status code: {requests.get(url).status_code}") from exc
     return request.text
 
 
+def prepare_url(url):
+    '.'
+    parsed_url = urlparse(url)
+    return parsed_url.scheme + '://' + parsed_url.netloc
+
+
 def write_to_file(filepath, webpage_content):
     """Write webpage content to file.
 
@@ -136,8 +142,8 @@ def download_image(url, path_to_directory, list_of_images):
     """
     list_of_image_relative_pathes = []
     for source in list_of_images:  # source = '/assets/professions/nodejs.png'
-        logging.debug(f'Downloading {url}, {source}')
-        r = requests.get(url + source).content
+        logging.debug(f'Downloading {prepare_url(url)}, {source}')
+        r = requests.get(prepare_url(url) + source).content
         src = source[:-len(Path(source).suffix)]
         # src = '/assets/professions/nodejs'
         source_name = ''.join([
@@ -182,12 +188,13 @@ def download_link(url, path_to_directory, list_of_links):
     """
     list_of_links_relative_pathes = []
     for link in list_of_links:
-        logging.debug(f'Downloading {url + link}')
-        filename = get_source_name(url, link)
+        url_core = prepare_url(url)
+        logging.debug(f'Downloading {url_core + link}')
+        filename = get_source_name(url_core, link)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
         try:
-            write_source_content_to_file(url, link, filepath)
+            write_source_content_to_file(url_core, link, filepath)
             bar_.next()
         except PermissionError as error1:
             print(f'Access denied to file {filepath}.')
@@ -220,11 +227,13 @@ def download_script(url, path_to_directory, list_of_scripts):
     """
     list_of_scripts_relative_pathes = []
     for script_src in list_of_scripts:
-        filename = get_source_name(url, script_src)
+        url_core = prepare_url(url)
+        logging.debug(f'Downloading {url_core + script_src}')
+        filename = get_source_name(url_core, script_src)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
         try:
-            write_source_content_to_file(url, script_src, filepath)
+            write_source_content_to_file(url_core, script_src, filepath)
             bar_.next()
         except PermissionError as error1:
             print(f'Access denied to file {filepath}.')
@@ -234,11 +243,12 @@ def download_script(url, path_to_directory, list_of_scripts):
             print(f'Unable to save data to {filepath}.')
             logging.error('Unable to save data to %s.', filepath)
             raise error2
-        relative_path_to_link = (
+        logging.debug('Path_to_script: %s', filepath)
+        relative_path_to_script = (
             f'{get_directory_name(get_name(url))}/{filename}'
         )
         bar_.next()
-        list_of_scripts_relative_pathes.append(relative_path_to_link)
+        list_of_scripts_relative_pathes.append(relative_path_to_script)
         bar_.finish()
     return list_of_scripts_relative_pathes
 
