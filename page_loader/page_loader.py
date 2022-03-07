@@ -19,7 +19,7 @@ def download(url, directory_path='current'):
     if directory_path == 'current':
         directory_path = os.getcwd()
     filepath = os.path.join(directory_path, filename)
-    logging.info('Webpage contents will be stored in %s.', filepath)
+    logging.info(f'Webpage {url} contents will be stored in {filepath}.')
 
     # create a dicrecotry for files
     directoryname_files = functions.get_directory_name(functions.get_name(url))

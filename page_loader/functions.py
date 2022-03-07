@@ -29,7 +29,7 @@ def get_name(url):  # FINE
     return ''.join(name)
 
 
-def get_directory_name(name):
+def get_directory_name(name):  # FINE
     """Get directory name containing downloaded webpage data.
 
     Parameters:
@@ -41,7 +41,7 @@ def get_directory_name(name):
     return name + '_files'
 
 
-def get_file_name(name):
+def get_website_name(url):  # ru-hexlet-io.html
     """Get a name of a file containing downloaded webpage.
 
     Parameters:
@@ -50,7 +50,15 @@ def get_file_name(name):
     Returns:
         name of a file containing the downloaded webpage.
     """
+    address = url.split('//')[1].split('/')[0]
+    name = [
+        '-' if not i.isalpha() and not i.isdigit() else i for i in address
+    ]
     return name + '.html'
+
+
+def get_file_name(website_name):
+    
 
 
 def get_webpage_contents(url):
