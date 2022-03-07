@@ -13,7 +13,7 @@ class KnownError(Exception):
     pass
 
 
-def get_name(url):  # FINE
+def get_name(url):  # ru-hexlet-io-cources
     """Derive a name of a directory or file from an url.
 
     Parameters:
@@ -29,7 +29,7 @@ def get_name(url):  # FINE
     return ''.join(name)
 
 
-def get_directory_name(name):  # FINE
+def get_directory_name(name):  # ru-hexlet-io-cources_files
     """Get directory name containing downloaded webpage data.
 
     Parameters:
@@ -41,7 +41,7 @@ def get_directory_name(name):  # FINE
     return name + '_files'
 
 
-def get_website_name(url):  # ru-hexlet-io.html
+def get_website_name(url):  # ru-hexlet-io
     """Get a name of a file containing downloaded webpage.
 
     Parameters:
@@ -54,11 +54,20 @@ def get_website_name(url):  # ru-hexlet-io.html
     name = [
         '-' if not i.isalpha() and not i.isdigit() else i for i in address
     ]
+    logging.debug(f'Website name: {"".join(name)}')
+    return ''.join(name)
+
+
+def get_main_file_name(name):  # ru-hexlet-io-cources.html
+    """Get a name of a file containing downloaded webpage.
+
+    Parameters:
+        name: name derived from url.
+
+    Returns:
+        name of a file containing the downloaded webpage.
+    """
     return name + '.html'
-
-
-def get_file_name(website_name):
-    
 
 
 def get_webpage_contents(url):
@@ -134,7 +143,8 @@ def download_image(url, path_to_directory, list_of_images):
         source_name = ''.join([
             '-' if not i.isalpha() and not i.isdigit() else i for i in src
         ])  # -assets-professions-nodejs
-        image_name = get_name(url) + source_name + Path(source).suffix
+        image_name =  get_website_name(url) + source_name + Path(source).suffix
+        logging.debug(f'image name: {image_name}')
         bar_ = IncrementalBar(f'{image_name}', max=1, suffix='%(percent)d%%')
         path_to_image = os.path.join(path_to_directory, image_name)
         try:
@@ -260,7 +270,7 @@ def get_source_name(url, source):
         name = ''.join([
             '-' if not i.isalpha() and not i.isdigit() else i for i in src
         ])  # -assets-professions-nodejs
-        source_name = get_name(url) + name + suffix
+        source_name = get_website_name(url) + name + suffix
     return source_name
 
 

@@ -15,7 +15,7 @@ def download(url, directory_path='current'):
     """
     webpage_content = functions.get_webpage_contents(url)
     logging.debug('Webpage contents retrieved.')
-    filename = functions.get_file_name(functions.get_name(url))
+    filename = functions.get_main_file_name(functions.get_name(url))
     if directory_path == 'current':
         directory_path = os.getcwd()
     filepath = os.path.join(directory_path, filename)
@@ -53,6 +53,7 @@ def download(url, directory_path='current'):
         directorypath_files,
         list_of_images,
     )
+    logging.debug(f'list_of_image_relative_pathes: {list_of_image_relative_pathes}')
     logging.info('Images successfully downloaded.')
     logging.debug('Sources are being downloaded...')  # links???
     list_of_links_relative_pathes = functions.download_link(

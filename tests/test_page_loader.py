@@ -1,7 +1,7 @@
 from urllib.error import HTTPError
 from urllib.parse import urljoin
 from page_loader.page_loader import download
-from page_loader.functions import get_file_name
+from page_loader.functions import get_main_file_name
 from page_loader.functions import get_directory_name, get_name
 from page_loader.functions import get_webpage_contents
 from page_loader.functions import write_to_file
@@ -28,17 +28,17 @@ def read_file(filepath, flag='r'):
 
 def test_get_directory_name():
     "Test get_directory_name function in page_loader module"
-    name = get_name('https://ru.hexlet.io')
-    correct_answer = 'ru-hexlet-io_files'
+    name = get_name('https://ru.hexlet.io/courses')
+    correct_answer = 'ru-hexlet-io-courses_files'
     received_filepath = get_directory_name(name)
     assert received_filepath == correct_answer
 
 
 def test_get_file_name():
-    "Test get_file_name function in page_loader module"
-    name = get_name('https://ru.hexlet.io')
-    correct_answer = 'ru-hexlet-io.html'
-    received_filepath = get_file_name(name)
+    "Test get_main_file_name function in page_loader module"
+    name = get_name('https://ru.hexlet.io/courses')
+    correct_answer = 'ru-hexlet-io-courses.html'
+    received_filepath = get_main_file_name(name)
     assert received_filepath == correct_answer
 
 
@@ -67,7 +67,7 @@ def test_download():
         correct_answer = read_file('tests/fixtures/downloaded_website.html')
         with requests_mock.Mocker() as mock:
             mock.get(
-                'https://ru.hexlet.io',
+                'https://ru.hexlet.io/courses',
                 text=read_file('tests/fixtures/mocks/webpage_source.html'),
             )  # mock file contents
             mock.get(
@@ -87,7 +87,7 @@ def test_download():
                 text=read_file('tests/fixtures/mocks/sub_html.html'),
             )
 
-            filepath = download('https://ru.hexlet.io', temporary_directory)
+            filepath = download('https://ru.hexlet.io/courses', temporary_directory)
             received = read_file(os.path.join(
                 temporary_directory,
                 'ru-hexlet-io.html',
@@ -95,9 +95,8 @@ def test_download():
 
             directorypath_files = os.path.join(
                 temporary_directory,
-                get_directory_name(get_name('https://ru.hexlet.io')),
-            )  # folder for supporting files
-            # check if 'ru-hexlet-io-courses_files' already exists
+                get_directory_name(get_name('https://ru.hexlet.io/courses')),
+            )
             if not os.path.isdir(directorypath_files):
                 os.mkdir(directorypath_files)
 
@@ -136,20 +135,20 @@ def test_for_http_errors():
             # Note to self:
             # register_uri() takes the HTTP method, the URI and then information
             # that is used to build the response.
-            mock.register_uri('GET', 'https://ru.hexlet.io', exc=requests.HTTPError)
+            mock.register_uri('GET', 'https://ru.hexlet.io/courses', exc=requests.HTTPError)
             # exc = An exception that will be raised instead of returning a response.
             # see https://requests-mock.readthedocs.io/en/latest/response.html
             # see +
             # https://stackoverflow.com/questions/19342111/get-http-error-code-from-requests-exceptions-httperror
             with pytest.raises(requests.HTTPError) as exc_info:
-                download('https://ru.hexlet.io', temporary_directory)
+                download('https://ru.hexlet.io/courses', temporary_directory)
             assert exc_info.type is requests.HTTPError
 
 
 @pytest.mark.parametrize('code', [403, 404, 500])
 def test_repsonse_with_error(requests_mock, code):
     "Test for 404 and 500 status codes."
-    url = urljoin('https://ru.hexlet.io', str(code))
+    url = urljoin('https://ru.hexlet.io/courses', str(code))
     requests_mock.get(url, status_code=code)
     with tempfile.TemporaryDirectory() as temporary_directory:
         with pytest.raises(Exception):
