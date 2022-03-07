@@ -61,6 +61,7 @@ def download(url, directory_path='current'):
         directorypath_files,
         list_of_links,
     )
+    logging.debug(f'list_of_links_relative_pathes: {list_of_links_relative_pathes}')
     logging.info('Sources successfully downloaded.')  # or links???
     logging.debug('Scripts are being downloaded...')
     list_of_scripts_relative_pathes = functions.download_script(
@@ -68,6 +69,7 @@ def download(url, directory_path='current'):
         directorypath_files,
         list_of_scripts,
     )
+    logging.debug(f'list_of_scripts_relative_pathes: {list_of_scripts_relative_pathes}')
     logging.info('Scripts successfully downloaded.')
 
     # replace relative pathes (imgs, links, scripts[src]) in webpage contents
