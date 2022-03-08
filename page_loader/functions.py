@@ -359,9 +359,12 @@ def get_scripts(file_contents):
 {file_contents.find_all("script")}')
     for script in scripts:
         src = script.get('src')
-        if is_local(src) and script['src']:
-            list_of_scripts.append(src)
-            logging.debug(F'sript: {src}')
+        logging.debug(F'Considered sript: {src}')
+        if is_local(src):
+            logging.debug(F'Script still being considered: {src}')
+            if script['src']:
+                list_of_scripts.append(src)
+                logging.debug(F'Approved sript: {src}')
     logging.debug('list of scripts: %s', list_of_scripts)
     return scripts, list_of_scripts
 

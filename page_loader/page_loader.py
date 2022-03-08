@@ -42,6 +42,7 @@ def download(url, directory_path='current'):
     # parse webpage contents
     file_contents = BeautifulSoup(webpage_content, 'html.parser')
     logging.debug('Webpage contents is being parsed...')
+    logging.debug(f'Webpage contents: {file_contents.prettify()}')
     images, list_of_images = functions.get_images(file_contents)
     links, list_of_links = functions.get_links(file_contents)
     scripts, list_of_scripts = functions.get_scripts(file_contents)
@@ -87,6 +88,8 @@ def download(url, directory_path='current'):
     functions.replace_pathes(
         scripts, list_of_scripts, list_of_scripts_relative_pathes, 'src',
     )
+
+    logging.debug(f'File contents will be {file_contents.prettify()}')
 
     functions.write_to_file(filepath, file_contents.prettify())
     logging.info('Webpage contents successfully saved in %s.', filepath)

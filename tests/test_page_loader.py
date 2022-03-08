@@ -90,7 +90,7 @@ def test_download():
             filepath = download('https://ru.hexlet.io/courses', temporary_directory)
             received = read_file(os.path.join(
                 temporary_directory,
-                'ru-hexlet-io.html',
+                'ru-hexlet-io-courses.html',
             ))  # HTML file
 
             directorypath_files = os.path.join(
