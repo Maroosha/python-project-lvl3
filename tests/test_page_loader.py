@@ -4,7 +4,6 @@ from page_loader.functions import get_main_file_name
 from page_loader.functions import get_directory_name, get_name
 from page_loader.functions import get_webpage_contents
 from page_loader.functions import write_to_file
-import logging
 import requests_mock
 import requests
 import pytest
@@ -64,7 +63,6 @@ def test_write_to_file():
 
 def test_download():
     "Test download function in page_loader module"
-    logging.debug('Test start')
     with tempfile.TemporaryDirectory() as temporary_directory:
         correct_answer = read_file('tests/fixtures/downloaded_website.html')
         with requests_mock.Mocker() as mock:

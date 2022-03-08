@@ -97,5 +97,4 @@ def download(url, directory_path='current'):
     functions.write_to_file(filepath, file_contents.prettify())
     logging.info('Webpage contents successfully saved in %s.', filepath)
 
-    print(f'\nPage was successfully downloaded into {filename}')
     return filepath

@@ -90,7 +90,14 @@ Status code: {requests.get(url).status_code}") from exc
 
 
 def prepare_url(url):
-    '.'
+    """Get url in the form of scheme://netloc.
+
+    Parameters:
+        url: webpage url.
+
+    Returns:
+        url in the form of scheme://netloc.
+    """
     parsed_url = urlparse(url)
     return parsed_url.scheme + '://' + parsed_url.netloc
 
