@@ -44,8 +44,8 @@ def download(url, directory_path='current'):
     logging.debug('Webpage contents is being parsed...')
     logging.debug(f'Webpage contents: {file_contents.prettify()}')
     images, list_of_images = functions.get_images(file_contents)
-    links, list_of_links = functions.get_links(file_contents)
-    scripts, list_of_scripts = functions.get_scripts(file_contents)
+    links, list_of_links = functions.get_links(file_contents, url)
+    scripts, list_of_scripts = functions.get_scripts(file_contents, url)
 
     # download all the files and return list of pathes to them:
     logging.debug('Images are being downloaded...')

@@ -115,7 +115,7 @@ def write_to_file(filepath, webpage_content):
         raise error2
 
 
-def is_local(url):
+def is_local(url, webpage_url):
     """Check whether a resource is local or not
     (if it belongs to ru.hexlet.io).
 
@@ -126,7 +126,8 @@ def is_local(url):
         true if local, false if not
     """
     parse_result = urlparse(str(url))
-    return parse_result.netloc == 'ru.hexlet.io' or parse_result.netloc == ''
+    webpage_netloc = urlparse(webpage_url).netloc
+    return parse_result.netloc == webpage_netloc or parse_result.netloc == ''
 
 
 def download_image(url, path_to_directory, list_of_images):
@@ -322,7 +323,7 @@ def get_images(file_contents):
     return images, list_of_images
 
 
-def get_links(file_contents):
+def get_links(file_contents, webpage_url):
     """Get links info.
 
     Parameters:
@@ -337,14 +338,14 @@ def get_links(file_contents):
 {file_contents.find_all("link")}')
     for link in links:
         href = link.get('href')
-        if is_local(href):
+        if is_local(href, webpage_url):
             list_of_links.append(href)
             logging.debug(F'link: {link.get("link")}')
     logging.debug('list of links: %s', list_of_links)
     return links, list_of_links
 
 
-def get_scripts(file_contents):
+def get_scripts(file_contents, webpage_url):
     """Get scripts info.
 
     Parameters:
@@ -360,7 +361,7 @@ def get_scripts(file_contents):
     for script in scripts:
         src = script.get('src')
         logging.debug(F'Considered sript: {src}')
-        if is_local(src):
+        if is_local(src, webpage_url):
             logging.debug(F'Script still being considered: {src}')
             if script['src']:
                 list_of_scripts.append(src)
