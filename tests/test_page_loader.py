@@ -1,4 +1,3 @@
-from urllib.error import HTTPError
 from urllib.parse import urljoin
 from page_loader.page_loader import download
 from page_loader.functions import get_main_file_name
@@ -51,7 +50,9 @@ def test_write_to_file():
                 'https://ru.hexlet.io/courses',
                 text=read_file('tests/fixtures/mocks/webpage_source.html'),
             )
-            webpage_content = get_webpage_contents('https://ru.hexlet.io/courses')
+            webpage_content = get_webpage_contents(
+                'https://ru.hexlet.io/courses',
+            )
             filepath = os.path.join(
                 temporary_directory,
                 'ru-hexlet-io-courses.html',
@@ -88,7 +89,10 @@ def test_download():
                 text=read_file('tests/fixtures/mocks/sub_html.html'),
             )
 
-            filepath = download('https://ru.hexlet.io/courses', temporary_directory)
+            filepath = download(
+                'https://ru.hexlet.io/courses',
+                temporary_directory,
+            )
             received = read_file(os.path.join(
                 temporary_directory,
                 'ru-hexlet-io-courses.html',
@@ -104,25 +108,25 @@ def test_download():
             assert os.path.exists(filepath)
             assert received == correct_answer
             assert os.path.isfile(
-                    os.path.join(
+                os.path.join(
                     directorypath_files,
                     'ru-hexlet-io-assets-professions-nodejs.png',
                 )
             )
             assert os.path.isfile(
-                    os.path.join(
+                os.path.join(
                     directorypath_files,
                     'ru-hexlet-io-packs-js-runtime.js',
                 )
             )
             assert os.path.isfile(
-                    os.path.join(
+                os.path.join(
                     directorypath_files,
                     'ru-hexlet-io-assets-application.css',
                 )
             )
             assert os.path.isfile(
-                    os.path.join(
+                os.path.join(
                     directorypath_files,
                     'ru-hexlet-io-courses.html',
                 )
@@ -136,8 +140,12 @@ def test_for_http_errors():
             # Note to self:
             # register_uri() takes the HTTP method, the URI and then information
             # that is used to build the response.
-            mock.register_uri('GET', 'https://ru.hexlet.io/courses', exc=requests.HTTPError)
-            # exc = An exception that will be raised instead of returning a response.
+            mock.register_uri(
+                'GET',
+                'https://ru.hexlet.io/courses',
+                exc=requests.HTTPError,
+            )
+            # exc=exception that will be raised instead of returning a response.
             # see https://requests-mock.readthedocs.io/en/latest/response.html
             # see +
             # https://stackoverflow.com/questions/19342111/get-http-error-code-from-requests-exceptions-httperror
