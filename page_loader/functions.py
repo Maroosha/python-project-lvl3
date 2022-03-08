@@ -150,7 +150,7 @@ def download_image(url, path_to_directory, list_of_images):
         source_name = ''.join([
             '-' if not i.isalpha() and not i.isdigit() else i for i in src
         ])  # -assets-professions-nodejs
-        image_name =  get_website_name(url) + source_name + Path(source).suffix
+        image_name = get_website_name(url) + source_name + Path(source).suffix
         logging.debug(f'image name: {image_name}')
         bar_ = IncrementalBar(f'{image_name}', max=1, suffix='%(percent)d%%')
         path_to_image = os.path.join(path_to_directory, image_name)

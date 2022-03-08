@@ -21,5 +21,5 @@ selfcheck:
 
 check: selfcheck test lint
 
-build:
+build: check
 	poetry build

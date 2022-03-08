@@ -5,7 +5,7 @@ from page_loader.functions import get_main_file_name
 from page_loader.functions import get_directory_name, get_name
 from page_loader.functions import get_webpage_contents
 from page_loader.functions import write_to_file
-# import logging
+import logging
 import requests_mock
 import requests
 import pytest
@@ -48,13 +48,13 @@ def test_write_to_file():
         correct_answer = read_file('tests/fixtures/mocks/webpage_source.html')
         with requests_mock.Mocker() as mock:
             mock.get(
-                'https://ru.hexlet.io',
+                'https://ru.hexlet.io/courses',
                 text=read_file('tests/fixtures/mocks/webpage_source.html'),
             )
-            webpage_content = get_webpage_contents('https://ru.hexlet.io')
+            webpage_content = get_webpage_contents('https://ru.hexlet.io/courses')
             filepath = os.path.join(
                 temporary_directory,
-                'ru-hexlet-io.html',
+                'ru-hexlet-io-courses.html',
             )
             write_to_file(filepath, webpage_content)
             received = read_file(filepath)
@@ -63,6 +63,7 @@ def test_write_to_file():
 
 def test_download():
     "Test download function in page_loader module"
+    logging.debug('Test start')
     with tempfile.TemporaryDirectory() as temporary_directory:
         correct_answer = read_file('tests/fixtures/downloaded_website.html')
         with requests_mock.Mocker() as mock:

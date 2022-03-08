@@ -54,7 +54,8 @@ def download(url, directory_path='current'):
         directorypath_files,
         list_of_images,
     )
-    logging.debug(f'list_of_image_relative_pathes: {list_of_image_relative_pathes}')
+    logging.debug(f'list_of_image_relative_pathes: \
+{list_of_image_relative_pathes}')
     logging.info('Images successfully downloaded.')
     logging.debug('Sources are being downloaded...')  # links???
     list_of_links_relative_pathes = functions.download_link(
@@ -62,7 +63,8 @@ def download(url, directory_path='current'):
         directorypath_files,
         list_of_links,
     )
-    logging.debug(f'list_of_links_relative_pathes: {list_of_links_relative_pathes}')
+    logging.debug(f'list_of_links_relative_pathes: \
+{list_of_links_relative_pathes}')
     logging.info('Sources successfully downloaded.')  # or links???
     logging.debug('Scripts are being downloaded...')
     list_of_scripts_relative_pathes = functions.download_script(
@@ -70,7 +72,8 @@ def download(url, directory_path='current'):
         directorypath_files,
         list_of_scripts,
     )
-    logging.debug(f'list_of_scripts_relative_pathes: {list_of_scripts_relative_pathes}')
+    logging.debug(f'list_of_scripts_relative_pathes: \
+{list_of_scripts_relative_pathes}')
     logging.info('Scripts successfully downloaded.')
 
     # replace relative pathes (imgs, links, scripts[src]) in webpage contents
@@ -94,5 +97,5 @@ def download(url, directory_path='current'):
     functions.write_to_file(filepath, file_contents.prettify())
     logging.info('Webpage contents successfully saved in %s.', filepath)
 
-#    print(f'\nPage was successfully downloaded into {filename}')
+    print(f'\nPage was successfully downloaded into {filename}')
     return filepath
