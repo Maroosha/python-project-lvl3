@@ -3,6 +3,7 @@
 import logging
 import os
 import page_loader.functions as functions
+import page_loader.helper as helper
 from bs4 import BeautifulSoup
 
 
@@ -13,16 +14,16 @@ def download(url, directory_path='current'):
         dir_path: path to a directory with downloaded webpage,
         url: url of a webpage to be downloaded.
     """
-    webpage_content = functions.get_webpage_contents(url)
+    webpage_content = helper.get_webpage_contents(url)
     logging.debug('Webpage contents retrieved.')
-    filename = functions.get_main_file_name(functions.get_name(url))
+    filename = helper.get_main_file_name(helper.get_name(url))
     if directory_path == 'current':
         directory_path = os.getcwd()
     filepath = os.path.join(directory_path, filename)
     logging.info(f'Webpage {url} contents will be stored in {filepath}.')
 
     # create a dicrecotry for files
-    directoryname_files = functions.get_directory_name(functions.get_name(url))
+    directoryname_files = helper.get_directory_name(helper.get_name(url))
     directorypath_files = os.path.join(directory_path, directoryname_files)
     try:
         os.mkdir(directorypath_files)  # path/to/webpage-url_files
@@ -94,7 +95,7 @@ def download(url, directory_path='current'):
 
     logging.debug(f'File contents will be {file_contents.prettify()}')
 
-    functions.write_to_file(filepath, file_contents.prettify())
+    helper.write_to_file(filepath, file_contents.prettify())
     logging.info('Webpage contents successfully saved in %s.', filepath)
 
     return filepath

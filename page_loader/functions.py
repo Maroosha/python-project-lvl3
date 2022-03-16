@@ -3,138 +3,10 @@
 import logging
 import os
 import requests
+import page_loader.helper as helper
 from pathlib import Path
 from progress.bar import IncrementalBar
 from urllib.parse import urlparse
-
-
-class KnownError(Exception):
-    "Some known error."
-    pass
-
-
-def get_name(url):  # ru-hexlet-io-cources
-    """Derive a name of a directory or file from an url.
-
-    Parameters:
-        url: webpage url.
-
-    Returns:
-        directory or file name as a string.
-    """
-    address = url.split('//')[1]
-    name = [
-        '-' if not i.isalpha() and not i.isdigit() else i for i in address
-    ]
-    return ''.join(name)
-
-
-def get_directory_name(name):  # ru-hexlet-io-cources_files
-    """Get directory name containing downloaded webpage data.
-
-    Parameters:
-        name: name derived from url.
-
-    Returns:
-        directory name as a string.
-    """
-    return name + '_files'
-
-
-def get_website_name(url):  # ru-hexlet-io
-    """Get a name of a file containing downloaded webpage.
-
-    Parameters:
-        name: name derived from url.
-
-    Returns:
-        name of a file containing the downloaded webpage.
-    """
-    address = url.split('//')[1].split('/')[0]
-    name = [
-        '-' if not i.isalpha() and not i.isdigit() else i for i in address
-    ]
-    logging.debug(f'Website name: {"".join(name)}')
-    return ''.join(name)
-
-
-def get_main_file_name(name):  # ru-hexlet-io-cources.html
-    """Get a name of a file containing downloaded webpage.
-
-    Parameters:
-        name: name derived from url.
-
-    Returns:
-        name of a file containing the downloaded webpage.
-    """
-    return name + '.html'
-
-
-def get_webpage_contents(url):
-    """Request data from a webpage.
-
-    Parameters:
-        url: webpage url.
-
-    Returns:
-        webpage content.
-    """
-    try:
-        request = requests.get(url)
-        request.raise_for_status()
-    except requests.exceptions.HTTPError as exc:
-        logging.error(exc)
-        raise KnownError(f"Connection failed. \
-Status code: {requests.get(url).status_code}") from exc
-    return request.text
-
-
-def prepare_url(url):
-    """Get url in the form of scheme://netloc.
-
-    Parameters:
-        url: webpage url.
-
-    Returns:
-        url in the form of scheme://netloc.
-    """
-    parsed_url = urlparse(url)
-    return parsed_url.scheme + '://' + parsed_url.netloc
-
-
-def write_to_file(filepath, webpage_content):
-    """Write webpage content to file.
-
-    Parameters:
-        url: webpage url,
-        filepath: path to file.
-    """
-    try:
-        with open(filepath, 'w') as file_:
-            file_.write(webpage_content)
-    except PermissionError as error1:
-        print(f'Access denied to file {filepath}.')
-        logging.error('Access denied to file %s.', filepath)
-        raise error1
-    except OSError as error2:
-        print(f'Unable to write to file {filepath}.')
-        logging.error('Unable to write to file %s.', filepath)
-        raise error2
-
-
-def is_local(url, webpage_url):
-    """Check whether a resource is local or not
-    (if it belongs to ru.hexlet.io).
-
-    Parameters:
-        url: url from src/href.
-
-    Returns:
-        true if local, false if not
-    """
-    parse_result = urlparse(str(url))
-    webpage_netloc = urlparse(webpage_url).netloc
-    return parse_result.netloc == webpage_netloc or parse_result.netloc == ''
 
 
 def download_image(url, path_to_directory, list_of_images):
@@ -150,14 +22,15 @@ def download_image(url, path_to_directory, list_of_images):
     """
     list_of_image_relative_pathes = []
     for source in list_of_images:  # source = '/assets/professions/nodejs.png'
-        logging.debug(f'Downloading {prepare_url(url)}, {source}')
-        r = requests.get(prepare_url(url) + source).content
+        logging.debug(f'Downloading {helper.prepare_url(url)}, {source}')
+        r = requests.get(helper.prepare_url(url) + source).content
         src = source[:-len(Path(source).suffix)]
         # src = '/assets/professions/nodejs'
         source_name = ''.join([
             '-' if not i.isalpha() and not i.isdigit() else i for i in src
         ])  # -assets-professions-nodejs
-        image_name = get_website_name(url) + source_name + Path(source).suffix
+        image_name = helper.get_website_name(url) + \
+            source_name + Path(source).suffix
         logging.debug(f'image name: {image_name}')
         bar_ = IncrementalBar(f'{image_name}', max=1, suffix='%(percent)d%%')
         path_to_image = os.path.join(path_to_directory, image_name)
@@ -175,7 +48,7 @@ def download_image(url, path_to_directory, list_of_images):
             raise error2
         logging.debug('Path_to_image: %s', path_to_image)
         relative_path_to_image = (
-            f'{get_directory_name(get_name(url))}/{image_name}'
+            f'{helper.get_directory_name(helper.get_name(url))}/{image_name}'
         )
         bar_.next()
         list_of_image_relative_pathes.append(relative_path_to_image)
@@ -196,7 +69,7 @@ def download_link(url, path_to_directory, list_of_links):
     """
     list_of_links_relative_pathes = []
     for link in list_of_links:
-        url_core = prepare_url(url)
+        url_core = helper.prepare_url(url)
         logging.debug(f'Downloading {url_core + link}')
         filename = get_source_name(url_core, link)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
@@ -214,7 +87,7 @@ def download_link(url, path_to_directory, list_of_links):
             raise error2
         logging.debug('Path_to_link: %s', filepath)
         relative_path_to_link = (
-            f'{get_directory_name(get_name(url))}/{filename}'
+            f'{helper.get_directory_name(helper.get_name(url))}/{filename}'
         )
         bar_.next()
         list_of_links_relative_pathes.append(relative_path_to_link)
@@ -235,7 +108,7 @@ def download_script(url, path_to_directory, list_of_scripts):
     """
     list_of_scripts_relative_pathes = []
     for script_src in list_of_scripts:
-        url_core = prepare_url(url)
+        url_core = helper.prepare_url(url)
         logging.debug(f'Downloading {url_core + script_src}')
         filename = get_source_name(url_core, script_src)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
@@ -253,7 +126,7 @@ def download_script(url, path_to_directory, list_of_scripts):
             raise error2
         logging.debug('Path_to_script: %s', filepath)
         relative_path_to_script = (
-            f'{get_directory_name(get_name(url))}/{filename}'
+            f'{helper.get_directory_name(helper.get_name(url))}/{filename}'
         )
         bar_.next()
         list_of_scripts_relative_pathes.append(relative_path_to_script)
@@ -288,7 +161,7 @@ def get_source_name(url, source):
         name = ''.join([
             '-' if not i.isalpha() and not i.isdigit() else i for i in src
         ])  # -assets-professions-nodejs
-        source_name = get_website_name(url) + name + suffix
+        source_name = helper.get_website_name(url) + name + suffix
     return source_name
 
 
@@ -302,8 +175,8 @@ def write_source_content_to_file(url, source, filepath):
     """
     source_parse = urlparse(source)
     if source_parse.netloc:
-        webpage_content = get_webpage_contents(source)
-        write_to_file(filepath, webpage_content)
+        webpage_content = helper.get_webpage_contents(source)
+        helper.write_to_file(filepath, webpage_content)
     else:
         webpage_content = requests.get(url + source).content
         with open(filepath, 'wb+') as file_:
@@ -345,7 +218,7 @@ def get_links(file_contents, webpage_url):
 {file_contents.find_all("link")}')
     for link in links:
         href = link.get('href')
-        if is_local(href, webpage_url):
+        if helper.is_local(href, webpage_url):
             list_of_links.append(href)
             logging.debug(F'link: {link.get("link")}')
     logging.debug('list of links: %s', list_of_links)
@@ -368,7 +241,7 @@ def get_scripts(file_contents, webpage_url):
     for script in scripts:
         src = script.get('src')
         logging.debug(F'Considered sript: {src}')
-        if is_local(src, webpage_url):
+        if helper.is_local(src, webpage_url):
             logging.debug(F'Script still being considered: {src}')
             if script['src']:
                 list_of_scripts.append(src)

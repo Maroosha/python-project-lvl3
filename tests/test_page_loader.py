@@ -1,14 +1,36 @@
 from urllib.parse import urljoin
 from page_loader.page_loader import download
-from page_loader.functions import get_main_file_name
-from page_loader.functions import get_directory_name, get_name
-from page_loader.functions import get_webpage_contents
-from page_loader.functions import write_to_file
-import requests_mock
+from page_loader.helper import get_main_file_name
+from page_loader.helper import get_directory_name, get_name
+from page_loader.helper import get_webpage_contents
+from page_loader.helper import write_to_file
 import requests
 import pytest
-import tempfile
 import os
+
+
+CODES = [403, 404, 500]
+ERRORS = [
+    requests.exceptions.HTTPError,
+    requests.exceptions.Timeout,
+    PermissionError,
+]
+URL = 'https://ru.hexlet.io/courses'
+DIRECTORY_NAME = 'ru-hexlet-io-courses_files'
+HTML_FILE = 'ru-hexlet-io-courses.html'
+INNER_HTML_FILE = 'tests/fixtures/mocks/sub_html.html'
+WEBPAGE_SOURCE = 'tests/fixtures/mocks/webpage_source.html'
+DOWNLOADED_WEBSITE = 'tests/fixtures/downloaded_website.html'
+CSS_URL = 'https://ru.hexlet.io/assets/application.css'
+JS_URL = 'https://ru.hexlet.io/packs/js/runtime.js'
+IMAGE_URL = 'https://ru.hexlet.io/assets/professions/nodejs.png'
+CSS_FILE = 'tests/fixtures/mocks/css_file.css'
+JS_FILE = 'tests/fixtures/mocks/js_file.js'
+IMAGE = 'tests/fixtures/mocks/nodejs.png'
+IMAGE_PATH = 'ru-hexlet-io-assets-professions-nodejs.png'
+JS_PATH = 'ru-hexlet-io-packs-js-runtime.js'
+CSS_PATH = 'ru-hexlet-io-assets-application.css'
+INNER_HTML_PATH = 'ru-hexlet-io-courses.html'
 
 
 def read_file(filepath, flag='r'):
@@ -26,137 +48,86 @@ def read_file(filepath, flag='r'):
 
 def test_get_directory_name():
     "Test get_directory_name function in page_loader module"
-    name = get_name('https://ru.hexlet.io/courses')
-    correct_answer = 'ru-hexlet-io-courses_files'
+    name = get_name(URL)
+    correct_answer = DIRECTORY_NAME
     received_filepath = get_directory_name(name)
     assert received_filepath == correct_answer
 
 
 def test_get_file_name():
     "Test get_main_file_name function in page_loader module"
-    name = get_name('https://ru.hexlet.io/courses')
-    correct_answer = 'ru-hexlet-io-courses.html'
+    name = get_name(URL)
+    correct_answer = HTML_FILE
     received_filepath = get_main_file_name(name)
     assert received_filepath == correct_answer
 
 
-def test_write_to_file():
+def test_write_to_file(tmp_path, requests_mock):
     "Test write_to_file function in page_loader module"
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        correct_answer = read_file('tests/fixtures/mocks/webpage_source.html')
-        with requests_mock.Mocker() as mock:
-            mock.get(
-                'https://ru.hexlet.io/courses',
-                text=read_file('tests/fixtures/mocks/webpage_source.html'),
-            )
-            webpage_content = get_webpage_contents(
-                'https://ru.hexlet.io/courses',
-            )
-            filepath = os.path.join(
-                temporary_directory,
-                'ru-hexlet-io-courses.html',
-            )
-            write_to_file(filepath, webpage_content)
-            received = read_file(filepath)
-            assert received == correct_answer
+    correct_answer = read_file(WEBPAGE_SOURCE)
+    requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
+    webpage_content = get_webpage_contents(URL)
+    filepath = os.path.join(tmp_path, HTML_FILE)
+    write_to_file(filepath, webpage_content)
+    received = read_file(filepath)
+    assert received == correct_answer
 
 
-def test_download():
+def test_download(tmp_path, requests_mock):
     "Test download function in page_loader module"
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        correct_answer = read_file('tests/fixtures/downloaded_website.html')
-        with requests_mock.Mocker() as mock:
-            mock.get(
-                'https://ru.hexlet.io/courses',
-                text=read_file('tests/fixtures/mocks/webpage_source.html'),
-            )  # mock file contents
-            mock.get(
-                'https://ru.hexlet.io/assets/application.css',
-                text=read_file('tests/fixtures/mocks/css_file.css'),
-            )
-            mock.get(
-                'https://ru.hexlet.io/packs/js/runtime.js',
-                text=read_file('tests/fixtures/mocks/js_file.js'),
-            )
-            mock.get(
-                'https://ru.hexlet.io/assets/professions/nodejs.png',
-                content=read_file('tests/fixtures/mocks/nodejs.png', 'rb'),
-            )
-            mock.get(
-                'https://ru.hexlet.io/courses',
-                text=read_file('tests/fixtures/mocks/sub_html.html'),
-            )
+    correct_answer = read_file(DOWNLOADED_WEBSITE)
+    requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
+    requests_mock.get(CSS_URL, text=read_file(CSS_FILE))
+    requests_mock.get(JS_URL, text=read_file(JS_FILE))
+    requests_mock.get(IMAGE_URL, content=read_file(IMAGE, 'rb'))
+    requests_mock.get(URL, text=read_file(INNER_HTML_FILE))
 
-            filepath = download(
-                'https://ru.hexlet.io/courses',
-                temporary_directory,
-            )
-            received = read_file(os.path.join(
-                temporary_directory,
-                'ru-hexlet-io-courses.html',
-            ))  # HTML file
+    filepath = download(URL, tmp_path)
+    received = read_file(os.path.join(tmp_path, HTML_FILE))
 
-            directorypath_files = os.path.join(
-                temporary_directory,
-                get_directory_name(get_name('https://ru.hexlet.io/courses')),
-            )
-            if not os.path.isdir(directorypath_files):
-                os.mkdir(directorypath_files)
+    directorypath_files = os.path.join(tmp_path, DIRECTORY_NAME)
 
-            assert os.path.exists(filepath)
-            assert received == correct_answer
-            assert os.path.isfile(
-                os.path.join(
-                    directorypath_files,
-                    'ru-hexlet-io-assets-professions-nodejs.png',
-                )
-            )
-            assert os.path.isfile(
-                os.path.join(
-                    directorypath_files,
-                    'ru-hexlet-io-packs-js-runtime.js',
-                )
-            )
-            assert os.path.isfile(
-                os.path.join(
-                    directorypath_files,
-                    'ru-hexlet-io-assets-application.css',
-                )
-            )
-            assert os.path.isfile(
-                os.path.join(
-                    directorypath_files,
-                    'ru-hexlet-io-courses.html',
-                )
-            )
+    assert os.path.exists(filepath)
+    assert received == correct_answer
+    assert os.path.isfile(
+        os.path.join(directorypath_files, IMAGE_PATH),
+    )
+    assert read_file(
+        os.path.join(directorypath_files, IMAGE_PATH),
+        'rb',
+    ) == read_file(IMAGE, 'rb')
+    assert os.path.isfile(
+        os.path.join(directorypath_files, JS_PATH),
+    )
+    assert read_file(
+        os.path.join(directorypath_files, JS_PATH),
+    ) == read_file(JS_FILE)
+    assert os.path.isfile(
+        os.path.join(directorypath_files, CSS_PATH),
+    )
+    assert read_file(
+        os.path.join(directorypath_files, CSS_PATH),
+    ) == read_file(CSS_FILE)
+    assert os.path.isfile(
+        os.path.join(directorypath_files, INNER_HTML_PATH),
+    )
+    assert read_file(
+        os.path.join(directorypath_files, INNER_HTML_PATH),
+    ) == read_file(INNER_HTML_FILE)
 
 
-def test_for_http_errors():
-    "Test for HTTP errors."
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        with requests_mock.Mocker() as mock:
-            # Note to self:
-            # register_uri() takes the HTTP method, the URI and then information
-            # that is used to build the response.
-            mock.register_uri(
-                'GET',
-                'https://ru.hexlet.io/courses',
-                exc=requests.HTTPError,
-            )
-            # exc=exception that will be raised instead of returning a response.
-            # see https://requests-mock.readthedocs.io/en/latest/response.html
-            # see +
-            # https://stackoverflow.com/questions/19342111/get-http-error-code-from-requests-exceptions-httperror
-            with pytest.raises(requests.HTTPError) as exc_info:
-                download('https://ru.hexlet.io/courses', temporary_directory)
-            assert exc_info.type is requests.HTTPError
+@pytest.mark.parametrize('error', ERRORS)
+def test_for_http_error(error, requests_mock, tmp_path):
+    "Test for errors."
+    requests_mock.get(URL, exc=error)
+    with pytest.raises(error):
+        download(URL, tmp_path)
 
 
-@pytest.mark.parametrize('code', [403, 404, 500])
-def test_repsonse_with_error(requests_mock, code):
-    "Test for 404 and 500 status codes."
-    url = urljoin('https://ru.hexlet.io/courses', str(code))
+@pytest.mark.parametrize('code', CODES)
+def test_repsonse_with_error(requests_mock, code, tmp_path):
+    "Test for 403, 404 and 500 status codes."
+    url = urljoin(URL, str(code))
     requests_mock.get(url, status_code=code)
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        with pytest.raises(Exception):
-            assert download(url, temporary_directory)
+    with pytest.raises(Exception):
+        assert download(url, tmp_path)

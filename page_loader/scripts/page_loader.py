@@ -5,15 +5,16 @@
 import argparse
 import logging
 import sys
+import os
 from page_loader.page_loader import download
-from page_loader.functions import KnownError
+from page_loader.helper import KnownError
 
 LOG_FILE = 'page_loader.log'
 FINAL_MESSAGE = '\nPage was successfully downloaded into {}'
 
 
-def main():
-    "."
+def parse_arguments():
+    "Parse command line arguments."
     parser = argparse.ArgumentParser(description='Webpage loader')
     parser.add_argument(
         '-v', '--version',
@@ -22,11 +23,16 @@ def main():
     )
     parser.add_argument(
         '-o', '--output',
-        default='current',  # current working directory
-        help='directory path',
+        default=os.getcwd(),  # current working directory
+        help='directory path ("." for current directory)',
     )
     parser.add_argument('url')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    "Main function."
+    args = parse_arguments()
     try:
         filepath = download(args.url, args.output)
     except KnownError as known_error:
