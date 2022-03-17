@@ -109,7 +109,7 @@ def get_sources(tag, file_contents, webpage_url):
         website_url: website url.
 
     Returns:
-        images from bs4 and list of image pathes.
+        sources from bs4 and sources of image pathes.
     """
     list_of_sources = []
     sources = file_contents.find_all(tag)
