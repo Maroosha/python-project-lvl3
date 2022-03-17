@@ -22,7 +22,7 @@ jobs:
           make install
       - name: Run linter
         run: |
-          make check
+          make lint
       - name: Test & publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
         env:

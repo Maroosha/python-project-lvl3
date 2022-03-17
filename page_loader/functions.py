@@ -9,73 +9,29 @@ from progress.bar import IncrementalBar
 from urllib.parse import urlparse
 
 
-def download_image(url, path_to_directory, list_of_images):
-    """Download images from a website.
+TAG_ATTRIBUTE_DICT = {'img': 'src', 'link': 'href', 'script': 'src'}
+
+
+def download_source(url, path_to_directory, list_of_sources):
+    """Download resources from 'image', 'link', 'scripts' tag.
 
     Parameters:
         url: website url,
-        path_to_directory: path to the dir where the image will be stored,
-        list_of_images: list of images.
-
-    Returns:
-        list of relative pathes to images.
-    """
-    list_of_image_relative_pathes = []
-    for source in list_of_images:  # source = '/assets/professions/nodejs.png'
-        logging.debug(f'Downloading {helper.prepare_url(url)}, {source}')
-        r = requests.get(helper.prepare_url(url) + source).content
-        src = source[:-len(Path(source).suffix)]
-        # src = '/assets/professions/nodejs'
-        source_name = ''.join([
-            '-' if not i.isalpha() and not i.isdigit() else i for i in src
-        ])  # -assets-professions-nodejs
-        image_name = helper.get_website_name(url) + \
-            source_name + Path(source).suffix
-        logging.debug(f'image name: {image_name}')
-        bar_ = IncrementalBar(f'{image_name}', max=1, suffix='%(percent)d%%')
-        path_to_image = os.path.join(path_to_directory, image_name)
-        try:
-            with open(path_to_image, 'wb+') as img:
-                img.write(r)
-                bar_.next()
-        except PermissionError as error1:
-            print(f'Access denied to file {path_to_image}.')
-            logging.error('Access denied to file %s.', path_to_image)
-            raise error1
-        except OSError as error2:
-            print(f'Unable to save data to {path_to_image}.')
-            logging.error('Unable to save an image as %s.', path_to_image)
-            raise error2
-        logging.debug('Path_to_image: %s', path_to_image)
-        relative_path_to_image = (
-            f'{helper.get_directory_name(helper.get_name(url))}/{image_name}'
-        )
-        bar_.next()
-        list_of_image_relative_pathes.append(relative_path_to_image)
-        bar_.finish()
-    return list_of_image_relative_pathes
-
-
-def download_link(url, path_to_directory, list_of_links):
-    """Download resources from 'link' tag.
-
-    Parameters:
-        url: website url,
-        path_to_directory: path to the dir where the image will be stored,
+        path_to_directory: path to the dir where the source will be stored,
         list_of_links: list of links.
 
     Returns:
         list of relative pathes to links.
     """
-    list_of_links_relative_pathes = []
-    for link in list_of_links:
+    list_of_source_relative_pathes = []
+    for source in list_of_sources:
         url_core = helper.prepare_url(url)
-        logging.debug(f'Downloading {url_core + link}')
-        filename = get_source_name(url_core, link)
+        logging.debug(f'Downloading {url_core + source}')
+        filename = get_source_name(url_core, source)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
         try:
-            write_source_content_to_file(url_core, link, filepath)
+            write_source_content_to_file(url_core, source, filepath)
             bar_.next()
         except PermissionError as error1:
             print(f'Access denied to file {filepath}.')
@@ -90,48 +46,9 @@ def download_link(url, path_to_directory, list_of_links):
             f'{helper.get_directory_name(helper.get_name(url))}/{filename}'
         )
         bar_.next()
-        list_of_links_relative_pathes.append(relative_path_to_link)
+        list_of_source_relative_pathes.append(relative_path_to_link)
         bar_.finish()
-    return list_of_links_relative_pathes
-
-
-def download_script(url, path_to_directory, list_of_scripts):
-    """Download resources from 'script' tag if there is 'src' attribute.
-
-    Parameters:
-        url: website url,
-        path_to_directory: path to the dir where the image will be stored,
-        list_of_images: list of scripts.
-
-    Returns:
-        list of relative pathes to scripts.
-    """
-    list_of_scripts_relative_pathes = []
-    for script_src in list_of_scripts:
-        url_core = helper.prepare_url(url)
-        logging.debug(f'Downloading {url_core + script_src}')
-        filename = get_source_name(url_core, script_src)
-        bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
-        filepath = os.path.join(path_to_directory, filename)
-        try:
-            write_source_content_to_file(url_core, script_src, filepath)
-            bar_.next()
-        except PermissionError as error1:
-            print(f'Access denied to file {filepath}.')
-            logging.error('Access denied to file %s.', filepath)
-            raise error1
-        except OSError as error2:
-            print(f'Unable to save data to {filepath}.')
-            logging.error('Unable to save data to %s.', filepath)
-            raise error2
-        logging.debug('Path_to_script: %s', filepath)
-        relative_path_to_script = (
-            f'{helper.get_directory_name(helper.get_name(url))}/{filename}'
-        )
-        bar_.next()
-        list_of_scripts_relative_pathes.append(relative_path_to_script)
-        bar_.finish()
-    return list_of_scripts_relative_pathes
+    return list_of_source_relative_pathes
 
 
 def get_source_name(url, source):
@@ -183,96 +100,40 @@ def write_source_content_to_file(url, source, filepath):
             file_.write(webpage_content)
 
 
-def get_images(file_contents):
-    """Get images info.
+def get_sources(tag, file_contents, webpage_url):
+    """Get source info.
 
     Parameters:
-        file_contents: bs4-ed webpage contents.
+        tag: 'img', 'link' or 'script',
+        file_contents: bs4-ed webpage contents,
+        website_url: website url.
 
     Returns:
         images from bs4 and list of image pathes.
     """
-    list_of_images = []
-    images = file_contents.find_all('img')
-    logging.debug(f'file_contents.find_all("img"): \
-{file_contents.find_all("img")}')
-    for image in images:
-        list_of_images.append(image.get('src'))
-        logging.debug(F'image: {image.get("src")}')
-    logging.debug('list of images: %s', list_of_images)
-    return images, list_of_images
+    list_of_sources = []
+    sources = file_contents.find_all(tag)
+    for source in sources:
+        attribute = source.get(TAG_ATTRIBUTE_DICT[tag])
+        if helper.is_local(attribute, webpage_url):
+            if tag == 'script' and source['src']:
+                list_of_sources.append(attribute)
+            list_of_sources.append(attribute)
+    return sources, list_of_sources
 
 
-def get_links(file_contents, webpage_url):
-    """Get links info.
-
-    Parameters:
-        file_contents: bs4-ed webpage contents.
-
-    Returns:
-        links from bs4 and list of links pathes.
-    """
-    list_of_links = []
-    links = file_contents.find_all('link')
-    logging.debug(f'file_contents.find_all("link"): \
-{file_contents.find_all("link")}')
-    for link in links:
-        href = link.get('href')
-        if helper.is_local(href, webpage_url):
-            list_of_links.append(href)
-            logging.debug(F'link: {link.get("link")}')
-    logging.debug('list of links: %s', list_of_links)
-    return links, list_of_links
-
-
-def get_scripts(file_contents, webpage_url):
-    """Get scripts info.
+def replace_pathes(tag, sources, list_of_sources, relative_pathes):
+    """Replace pathes to sources with their relative pathes.
 
     Parameters:
-        file_contents: bs4-ed webpage contents.
-
-    Returns:
-        scripts from bs4 and list of scripts pathes.
-    """
-    list_of_scripts = []
-    scripts = file_contents.find_all('script')
-    logging.debug(f'file_contents.find_all("script"): \
-{file_contents.find_all("script")}')
-    for script in scripts:
-        src = script.get('src')
-        logging.debug(F'Considered sript: {src}')
-        if helper.is_local(src, webpage_url):
-            logging.debug(F'Script still being considered: {src}')
-            if script['src']:
-                list_of_scripts.append(src)
-                logging.debug(F'Approved sript: {src}')
-    logging.debug('list of scripts: %s', list_of_scripts)
-    return scripts, list_of_scripts
-
-
-def replace_image_pathes(images, list_of_images, relative_pathes):
-    """Replace image pathes with their relative pathes.
-
-    Parameters:
-        images: bs4-ed images,
-        list_of_images: path to an image,
-        relative_pathes: relative pathe to an image.
-    """
-    hash_table = dict(zip(list_of_images, relative_pathes))
-    for source in images:
-        source['src'] = hash_table[source['src']]
-
-
-def replace_pathes(sources, list_of_sources, relative_pathes, attribute):
-    """Replace links/sources pathes with their relative pathes.
-
-    Parameters:
+        tag: 'img', 'link' or 'script',
         source: bs4-ed links/sources,
         list_of_images: path to a link/source,
-        relative_pathes: relative pathe to a link/source.
+        relative_pathes: relative path to a link/source.
     """
     hash_table = dict(zip(list_of_sources, relative_pathes))
     for source in sources:
-        attr = source.get(attribute)
+        attr = source.get(TAG_ATTRIBUTE_DICT[tag])
         if attr in hash_table:
-            source[attribute] = hash_table[source[attribute]]
+            source[TAG_ATTRIBUTE_DICT[tag]] = \
+                hash_table[source[TAG_ATTRIBUTE_DICT[tag]]]

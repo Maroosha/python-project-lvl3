@@ -17,7 +17,7 @@ def download(url, directory_path='current'):
     webpage_content = helper.get_webpage_contents(url)
     logging.debug('Webpage contents retrieved.')
     filename = helper.get_main_file_name(helper.get_name(url))
-    if directory_path == 'current':
+    if directory_path == '.':
         directory_path = os.getcwd()
     filepath = os.path.join(directory_path, filename)
     logging.info(f'Webpage {url} contents will be stored in {filepath}.')
@@ -43,57 +43,56 @@ def download(url, directory_path='current'):
     # parse webpage contents
     file_contents = BeautifulSoup(webpage_content, 'html.parser')
     logging.debug('Webpage contents is being parsed...')
-    logging.debug(f'Webpage contents: {file_contents.prettify()}')
-    images, list_of_images = functions.get_images(file_contents)
-    links, list_of_links = functions.get_links(file_contents, url)
-    scripts, list_of_scripts = functions.get_scripts(file_contents, url)
+    images, list_of_images = functions.get_sources('img', file_contents, url)
+    links, list_of_links = functions.get_sources('link', file_contents, url)
+    scripts, list_of_scripts = functions.get_sources(
+        'script',
+        file_contents,
+        url,
+    )
 
     # download all the files and return list of pathes to them:
     logging.debug('Images are being downloaded...')
-    list_of_image_relative_pathes = functions.download_image(
+    list_of_image_relative_pathes = functions.download_source(
         url,
         directorypath_files,
         list_of_images,
     )
-    logging.debug(f'list_of_image_relative_pathes: \
-{list_of_image_relative_pathes}')
     logging.info('Images successfully downloaded.')
     logging.debug('Sources are being downloaded...')  # links???
-    list_of_links_relative_pathes = functions.download_link(
+    list_of_links_relative_pathes = functions.download_source(
         url,
         directorypath_files,
         list_of_links,
     )
-    logging.debug(f'list_of_links_relative_pathes: \
-{list_of_links_relative_pathes}')
     logging.info('Sources successfully downloaded.')  # or links???
     logging.debug('Scripts are being downloaded...')
-    list_of_scripts_relative_pathes = functions.download_script(
+    list_of_scripts_relative_pathes = functions.download_source(
         url,
         directorypath_files,
         list_of_scripts,
     )
-    logging.debug(f'list_of_scripts_relative_pathes: \
-{list_of_scripts_relative_pathes}')
     logging.info('Scripts successfully downloaded.')
 
     # replace relative pathes (imgs, links, scripts[src]) in webpage contents
-    functions.replace_image_pathes(
+    functions.replace_pathes(
+        'img',
         images,
         list_of_images,
         list_of_image_relative_pathes,
     )
     functions.replace_pathes(
+        'link',
         links,
         list_of_links,
         list_of_links_relative_pathes,
-        'href',
     )
     functions.replace_pathes(
-        scripts, list_of_scripts, list_of_scripts_relative_pathes, 'src',
+        'script',
+        scripts,
+        list_of_scripts,
+        list_of_scripts_relative_pathes,
     )
-
-    logging.debug(f'File contents will be {file_contents.prettify()}')
 
     helper.write_to_file(filepath, file_contents.prettify())
     logging.info('Webpage contents successfully saved in %s.', filepath)
