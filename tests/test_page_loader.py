@@ -1,8 +1,8 @@
 from urllib.parse import urljoin
 from page_loader.page_loader import download
-from page_loader.helper import get_main_file_name
-from page_loader.helper import get_directory_name, get_name
-from page_loader.helper import get_webpage_contents
+from page_loader.namer import get_html_file_name
+from page_loader.namer import get_directory_name
+from page_loader.url_processor import get_webpage_contents
 from page_loader.io_functions import write_to_file
 import requests
 import pytest
@@ -44,7 +44,7 @@ downloaded_files = [
 ]
 
 
-def read_file(filepath, flag='r'):
+def read_file(filepath: str, flag='r'):
     """Read a file.
 
     Parameters:
@@ -59,17 +59,15 @@ def read_file(filepath, flag='r'):
 
 def test_get_directory_name():
     "Test get_directory_name function in page_loader module"
-    name = get_name(URL)
     correct_answer = DIRECTORY_NAME
-    received_filepath = get_directory_name(name)
+    received_filepath = get_directory_name(URL)
     assert received_filepath == correct_answer
 
 
 def test_get_file_name():
-    "Test get_main_file_name function in page_loader module"
-    name = get_name(URL)
+    "Test get_html_file_name function in page_loader module"
     correct_answer = HTML_FIXTURE
-    received_filepath = get_main_file_name(name)
+    received_filepath = get_html_file_name(URL)
     assert received_filepath == correct_answer
 
 
@@ -86,7 +84,7 @@ def test_write_to_file(tmp_path, requests_mock):
 
 @pytest.mark.parametrize('received, expected', downloaded_files)
 def test_download(received, expected, tmp_path, requests_mock):
-    '.'
+    'Test download() funcion.'
     requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
     requests_mock.get(CSS_URL, text=read_file(CSS_FIXTURE))
     requests_mock.get(JS_URL, text=read_file(JS_FIXTURE))
@@ -100,7 +98,7 @@ def test_download(received, expected, tmp_path, requests_mock):
 
 
 def test_for_permission_error(requests_mock):
-    '.'
+    'Test for permission error.'
     requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
     webpage_content = get_webpage_contents(URL)
     filepath = '/some_filepath'

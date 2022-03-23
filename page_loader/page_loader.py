@@ -3,26 +3,29 @@
 import logging
 import os
 import page_loader.io_functions as functions
-import page_loader.helper as helper
+import page_loader.namer as namer
+import page_loader.url_processor as urlproc
+import page_loader.resources_processor as resproc
 from bs4 import BeautifulSoup
 
 
-def download(url, directory_path=os.getcwd()):
+def download(url: str, directory_path=os.getcwd()) -> str:
     """Get path to file with a saved webpage.
 
     Parameters:
         dir_path: path to a directory with downloaded webpage,
         url: url of a webpage to be downloaded.
+
+    Returns:
+        Path to html file with webpage data.
     """
-    webpage_data = helper.get_webpage_contents(url)
+    webpage_data = urlproc.get_webpage_contents(url)
     logging.debug('Webpage contents retrieved.')
-    html_filename = helper.get_main_file_name(helper.get_name(url))
-#    if directory_path == '.':
-#        directory_path = os.getcwd()
+    html_filename = namer.get_html_file_name(url)
     html_filepath = os.path.join(directory_path, html_filename)
     logging.info(f'Webpage {url} contents will be stored in {html_filepath}.')
 
-    directory_with_files = helper.get_directory_name(helper.get_name(url))
+    directory_with_files = namer.get_directory_name(url)
     path_to_files = os.path.join(directory_path, directory_with_files)
     try:
         os.mkdir(path_to_files)
@@ -42,9 +45,9 @@ def download(url, directory_path=os.getcwd()):
     soup = BeautifulSoup(webpage_data, 'html.parser')
     logging.debug('Webpage contents is being parsed...')
 
-    helper.process_source('img', path_to_files, soup, url)
-    helper.process_source('link', path_to_files, soup, url)
-    helper.process_source('script', path_to_files, soup, url)
+    resproc.process_resource('img', path_to_files, soup, url)
+    resproc.process_resource('link', path_to_files, soup, url)
+    resproc.process_resource('script', path_to_files, soup, url)
 
     functions.write_to_file(html_filepath, soup.prettify())
     logging.info('Webpage contents successfully saved in %s.', html_filepath)

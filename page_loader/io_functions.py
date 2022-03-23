@@ -1,20 +1,17 @@
-"Auxilary functions for page_loader.py."
+"Auxilary in-out functions for page_loader.py."
 
 import logging
 import requests
-import page_loader.helper as helper
+import page_loader.url_processor as urlproc
 from urllib.parse import urlparse
 
 
-TAG_ATTRIBUTE_DICT = {'img': 'src', 'link': 'href', 'script': 'src'}
-
-
-def write_to_file(filepath, data):
+def write_to_file(filepath: str, data: str):
     """Write webpage content to file.
 
     Parameters:
-        url: webpage url,
-        filepath: path to file.
+        filepath: path to file,
+        data: data to be written to file.
     """
     try:
         with open(filepath, 'w') as file_:
@@ -29,36 +26,19 @@ def write_to_file(filepath, data):
         raise error2
 
 
-def write_source_content_to_file(url, source, filepath):
+def write_resource_data_to_file(url: str, resource: str, filepath: str):
     """Write 'link' or 'source' tags contents into file.
 
     Parameters:
         url: website url,
-        source: source link,
+        resource: resource link,
         filepath: path to file.
     """
-    source_parse = urlparse(source)
-    if source_parse.netloc:
-        webpage_data = helper.get_webpage_contents(source)
+    resource_parse = urlparse(resource)
+    if resource_parse.netloc:
+        webpage_data = urlproc.get_webpage_contents(resource)
         write_to_file(filepath, webpage_data)
     else:
-        webpage_data = requests.get(url + source).content
+        webpage_data = requests.get(url + resource).content
         with open(filepath, 'wb+') as file_:
             file_.write(webpage_data)
-
-
-def replace_pathes(tag, sources, list_of_sources, relative_pathes):
-    """Replace pathes to sources with their relative pathes.
-
-    Parameters:
-        tag: 'img', 'link' or 'script',
-        source: bs4-ed links/sources,
-        list_of_images: path to a link/source,
-        relative_pathes: relative path to a link/source.
-    """
-    hash_table = dict(zip(list_of_sources, relative_pathes))
-    for source in sources:
-        attr = source.get(TAG_ATTRIBUTE_DICT[tag])
-        if attr in hash_table:
-            source[TAG_ATTRIBUTE_DICT[tag]] = \
-                hash_table[source[TAG_ATTRIBUTE_DICT[tag]]]
