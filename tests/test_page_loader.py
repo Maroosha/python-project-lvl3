@@ -1,8 +1,8 @@
 from urllib.parse import urljoin
 from page_loader.page_loader import download
-from page_loader.namer import get_html_file_name
-from page_loader.namer import get_directory_name
-from page_loader.url_processor import get_webpage_contents
+from page_loader.url import get_html_file_name
+from page_loader.url import get_directory_name
+from page_loader.url import get_webpage_data
 from page_loader.io_functions import write_to_file
 import requests
 import pytest
@@ -75,9 +75,9 @@ def test_write_to_file(tmp_path, requests_mock):
     "Test write_to_file function in page_loader module"
     correct_answer = read_file(WEBPAGE_SOURCE)
     requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
-    webpage_content = get_webpage_contents(URL)
+    webpage_data = get_webpage_data(URL)
     filepath = os.path.join(tmp_path, HTML_FIXTURE)
-    write_to_file(filepath, webpage_content)
+    write_to_file(filepath, webpage_data)
     received = read_file(filepath)
     assert received == correct_answer
 
@@ -100,10 +100,10 @@ def test_download(received, expected, tmp_path, requests_mock):
 def test_for_permission_error(requests_mock):
     'Test for permission error.'
     requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
-    webpage_content = get_webpage_contents(URL)
+    webpage_data = get_webpage_data(URL)
     filepath = '/some_filepath'
     with pytest.raises(PermissionError):
-        write_to_file(filepath, webpage_content)
+        write_to_file(filepath, webpage_data)
 
 
 @pytest.mark.parametrize('error', ERRORS)

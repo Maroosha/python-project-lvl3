@@ -7,7 +7,7 @@ import logging
 import sys
 import os
 from page_loader.page_loader import download
-from page_loader.url_processor import KnownError
+from page_loader.url import KnownError
 
 LOG_FILE = 'page_loader.log'
 FINAL_MESSAGE = '\nPage was successfully downloaded into {}'
