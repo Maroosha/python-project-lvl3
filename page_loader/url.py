@@ -37,8 +37,7 @@ def _get_name(url: str) -> str:  # ru-hexlet-io-cources
     """
     parsed = urlparse(str(url))
     address = parsed.netloc + parsed.path
-    name = hyphenate(address)
-    return ''.join(name)
+    return hyphenate(address)
 
 
 def get_directory_name(url: str) -> str:
@@ -63,8 +62,7 @@ def get_website_name(url: str) -> str:  # ru-hexlet-io
         name of a file containing the downloaded webpage.
     """
     parsed = urlparse(str(url)).netloc
-    name = hyphenate(parsed)
-    return name
+    return hyphenate(parsed)
 
 
 def get_html_file_name(url: str) -> str:  # ru-hexlet-io-cources.html
@@ -86,7 +84,7 @@ def get_webpage_data(url: str) -> str:
         url: webpage url.
 
     Returns:
-        webpage content.
+        webpage contents.
     """
     try:
         request = requests.get(url)
@@ -135,8 +133,7 @@ def prepare_url(url: str) -> str:
 
 
 def is_local(url: str, webpage_url: str) -> Literal:
-    """Check whether a resource is local or not
-    (if it belongs to ru.hexlet.io).
+    """Check whether a resource is local or not.
 
     Parameters:
         url: url from src/href.

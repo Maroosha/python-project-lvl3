@@ -42,7 +42,6 @@ def download(url: str, directory_path=os.getcwd()) -> str:
     logging.info('Downloaded files will be stored in %s.', path_to_resourses)
 
     soup = BeautifulSoup(webpage_data, 'html.parser')
-    print(f'type(soup) = {type(soup)}')
     logging.debug('Webpage contents is being parsed...')
 
     for tag in ['img', 'link', 'script']:

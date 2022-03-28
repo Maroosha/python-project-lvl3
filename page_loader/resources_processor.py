@@ -5,6 +5,7 @@ import os
 import page_loader.io_functions as functions
 import page_loader.url as url_
 import typing
+from bs4 import BeautifulSoup
 from pathlib import Path
 from progress.bar import IncrementalBar
 from urllib.parse import urlparse
@@ -15,7 +16,7 @@ TAG_ATTRIBUTE_DICT = {'img': 'src', 'link': 'href', 'script': 'src'}
 
 def get_resources(
     tag: str,
-    soup: str,
+    soup: BeautifulSoup,
     webpage_url: str,
 ) -> typing.Tuple[str, str]:
     """Get resource info.
@@ -129,7 +130,12 @@ def replace_paths(
                 path_to_relative_path[resource[TAG_ATTRIBUTE_DICT[tag]]]
 
 
-def process_resource(tag: str, path_to_files: str, soup: str, url: str):
+def process_resource(
+    tag: str,
+    path_to_files: str,
+    soup: BeautifulSoup,
+    url: str,
+):
     """
     Process a resource.
 
