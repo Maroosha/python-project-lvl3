@@ -8,6 +8,9 @@ import page_loader.resources_processor as resproc
 from bs4 import BeautifulSoup
 
 
+TAGS = ('img', 'link', 'script')
+
+
 def download(url: str, directory_path=os.getcwd()) -> str:
     """Get path to file with a saved webpage.
 
@@ -25,27 +28,28 @@ def download(url: str, directory_path=os.getcwd()) -> str:
     logging.info(f'Webpage {url} contents will be stored in {html_filepath}.')
 
     directory_with_resourses = url_.get_directory_name(url)
-    path_to_resourses = os.path.join(directory_path, directory_with_resourses)
+    path_to_resources = os.path.join(directory_path, directory_with_resourses)
     try:
-        os.mkdir(path_to_resourses)
+        os.mkdir(path_to_resources)
     except FileNotFoundError as not_found:
-        print(f'No such file or directory: {path_to_resourses}')
-        logging.exception('No such file or directory: %s', path_to_resourses)
+        print(f'No such file or directory: {path_to_resources}')
+        logging.exception('No such file or directory: %s', path_to_resources)
         raise not_found
     except OSError as err:
-        print(f'Directory {path_to_resourses} already exists.')
+        print(f'Directory {path_to_resources} already exists.')
         logging.exception(
             'Directory %s since exists.',
-            path_to_resourses,
+            path_to_resources,
         )
         raise err
-    logging.info('Downloaded files will be stored in %s.', path_to_resourses)
+    logging.info('Downloaded files will be stored in %s.', path_to_resources)
 
     soup = BeautifulSoup(webpage_data, 'html.parser')
     logging.debug('Webpage contents is being parsed...')
-
-    for tag in ['img', 'link', 'script']:
-        resproc.process_resource(tag, path_to_resourses, soup, url)
+    resources = soup.find_all(TAGS)
+    logging.debug('Sources are being downloaded...')
+    resproc.process_resources(path_to_resources, resources, url)
+    logging.info('Sources successfully downloaded.')
 
     functions.write_to_file(html_filepath, soup.prettify())
     logging.info('Webpage contents successfully saved in %s.', html_filepath)

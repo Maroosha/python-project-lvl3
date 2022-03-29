@@ -5,40 +5,38 @@ import os
 import page_loader.io_functions as functions
 import page_loader.url as url_
 import typing
-from bs4 import BeautifulSoup
 from pathlib import Path
 from progress.bar import IncrementalBar
 from urllib.parse import urlparse
 
 
 TAG_ATTRIBUTE_DICT = {'img': 'src', 'link': 'href', 'script': 'src'}
+TAGS = ('img', 'link')
 
 
-def get_resources(
-    tag: str,
-    soup: BeautifulSoup,
-    webpage_url: str,
-) -> typing.Tuple[str, str]:
+def _get_resources(
+    resources: typing.List[str],
+    url: str,
+) -> typing.List[str]:
     """Get resource info.
 
     Parameters:
-        tag: 'img', 'link' or 'script',
         soup: bs4-ed webpage contents,
-        website_url: website url.
+        url: website url.
 
     Returns:
         resources from bs4 and sources of image paths.
     """
     paths = []
-    resources = soup.find_all(tag)
-    for resource in resources:
-        attribute = resource.get(TAG_ATTRIBUTE_DICT[tag])
-        if url_.is_local(attribute, webpage_url):
-            paths.append(attribute)
-    return resources, paths
+    for tag in TAGS:
+        for resource in resources:
+            attribute = resource.get(TAG_ATTRIBUTE_DICT[tag])
+            if url_.is_local(attribute, url) and attribute is not None:
+                paths.append(attribute)
+    return paths
 
 
-def download_resource(
+def _download_resource(
     url: str,
     path_to_directory: str,
     resource_paths: list,
@@ -57,7 +55,7 @@ def download_resource(
     for resource in resource_paths:
         url_core = url_.prepare_url(url)
         logging.debug(f'Downloading {url_core + resource}')
-        filename = get_resource_name(url_core, resource)
+        filename = _get_resource_name(url_core, resource)
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
         try:
@@ -81,7 +79,7 @@ def download_resource(
     return relative_paths
 
 
-def get_resource_name(url: str, resource: str) -> str:
+def _get_resource_name(url: str, resource: str) -> str:
     """Get name of the link/script resource (filename).
 
     Parameters:
@@ -108,7 +106,7 @@ def get_resource_name(url: str, resource: str) -> str:
     return resource_name
 
 
-def replace_paths(
+def _replace_paths(
     tag: str,
     resources: typing.List[str],
     paths: typing.List[str],
@@ -117,7 +115,7 @@ def replace_paths(
     """Replace paths to resources with their relative paths.
 
     Parameters:
-        tag: 'img', 'link' or 'script',
+        tag: 'img' or 'link',
         resources: bs4-ed resource (image/link/source),
         paths: path to the resource,
         relative_paths: relative paths to the resource.
@@ -130,32 +128,29 @@ def replace_paths(
                 path_to_relative_path[resource[TAG_ATTRIBUTE_DICT[tag]]]
 
 
-def process_resource(
-    tag: str,
-    path_to_files: str,
-    soup: BeautifulSoup,
+def process_resources(
+    path_to_resources: str,
+    resources: typing.List[str],
     url: str,
 ):
     """
     Process a resource.
 
     Parameters:
-        tag: "img", "link", "script",
         path_to_files: path to a directory with downloaded files,
         soup: bs4-ed webpage contents,
         url: webpage url.
     """
-    resources, paths = get_resources(tag, soup, url)
-    logging.debug(f'Sources {tag} are being downloaded...')
-    relative_paths = download_resource(
-        url,
-        path_to_files,
-        paths,
-    )
-    logging.info(f'Sources {tag} successfully downloaded.')
-    replace_paths(
-        tag,
-        resources,
-        paths,
-        relative_paths,
-    )
+    paths = _get_resources(resources, url)
+    for tag in TAGS:
+        relative_paths = _download_resource(
+            url,
+            path_to_resources,
+            paths,
+        )
+        _replace_paths(
+            tag,
+            resources,
+            paths,
+            relative_paths,
+        )
