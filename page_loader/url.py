@@ -3,7 +3,7 @@
 import logging
 from typing import Literal
 import requests
-import typing
+from typing import Tuple, Union
 from urllib.parse import urlparse
 
 
@@ -99,7 +99,7 @@ Status code: {requests.get(url).status_code}") from exc
 def get_resource_data(
     url: str,
     resource: str,
-) -> typing.Tuple[typing.Union[str, bytes], str]:
+) -> Tuple[Union[str, bytes], str]:
     """Write 'link' or 'source' tags contents into file.
 
     Parameters:

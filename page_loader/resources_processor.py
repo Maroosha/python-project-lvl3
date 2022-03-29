@@ -4,8 +4,8 @@ import logging
 import os
 import page_loader.io_functions as functions
 import page_loader.url as url_
-import typing
 from pathlib import Path
+from typing import List
 from progress.bar import IncrementalBar
 from urllib.parse import urlparse
 
@@ -15,13 +15,13 @@ TAGS = ('img', 'link')
 
 
 def _get_resources(
-    resources: typing.List[str],
+    resources: List[str],
     url: str,
-) -> typing.List[str]:
+) -> List[str]:
     """Get resource info.
 
     Parameters:
-        soup: bs4-ed webpage contents,
+        resources: resources from bs4-ed url,
         url: website url.
 
     Returns:
@@ -40,7 +40,7 @@ def _download_resource(
     url: str,
     path_to_directory: str,
     resource_paths: list,
-) -> typing.List[str]:
+) -> List[str]:
     """Download resources from 'image', 'link', 'scripts' tag.
 
     Parameters:
@@ -108,9 +108,9 @@ def _get_resource_name(url: str, resource: str) -> str:
 
 def _replace_paths(
     tag: str,
-    resources: typing.List[str],
-    paths: typing.List[str],
-    relative_paths: typing.List[str],
+    resources: List[str],
+    paths: List[str],
+    relative_paths: List[str],
 ):
     """Replace paths to resources with their relative paths.
 
@@ -130,7 +130,7 @@ def _replace_paths(
 
 def process_resources(
     path_to_resources: str,
-    resources: typing.List[str],
+    resources: List[str],
     url: str,
 ):
     """
