@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 from page_loader.page_loader import download
 from page_loader.url import get_html_file_name
 from page_loader.url import get_directory_name
-from page_loader.url import get_webpage_data
+from page_loader.io_functions import get_webpage_data
 from page_loader.io_functions import write_to_file
 import requests
 import pytest
@@ -10,7 +10,6 @@ import os
 
 
 URL = 'https://ru.hexlet.io/courses'
-
 DIRECTORY_NAME = 'ru-hexlet-io-courses_files'
 WEBPAGE_SOURCE = 'tests/fixtures/mocks/webpage_source.html'
 DOWNLOADED_WEBSITE = 'tests/fixtures/downloaded_website.html'

@@ -1,9 +1,5 @@
 "Auxilary url processing functions for page_loader.py."
 
-import logging
-from typing import Literal
-import requests
-from typing import Tuple, Union
 from urllib.parse import urlparse
 
 
@@ -77,48 +73,6 @@ def get_html_file_name(url: str) -> str:  # ru-hexlet-io-cources.html
     return _get_name(url) + '.html'
 
 
-def get_webpage_data(url: str) -> str:
-    """Request data from a webpage.
-
-    Parameters:
-        url: webpage url.
-
-    Returns:
-        webpage contents.
-    """
-    try:
-        request = requests.get(url)
-        request.raise_for_status()
-    except requests.exceptions.HTTPError as exc:
-        logging.error(exc)
-        raise KnownError(f"Connection failed. \
-Status code: {requests.get(url).status_code}") from exc
-    return request.text
-
-
-def get_resource_data(
-    url: str,
-    resource: str,
-) -> Tuple[Union[str, bytes], str]:
-    """Write 'link' or 'source' tags contents into file.
-
-    Parameters:
-        url: website url,
-        resource: resource link.
-
-    Returns:
-        data from a resource.
-    """
-    resource_parse = urlparse(resource)
-    if resource_parse.netloc:
-        data = get_webpage_data(resource)
-        flag = 'w'
-    else:
-        data = requests.get(url + resource).content
-        flag = 'wb+'
-    return data, flag
-
-
 def prepare_url(url: str) -> str:
     """Get url in the form of scheme://netloc.
 
@@ -132,7 +86,7 @@ def prepare_url(url: str) -> str:
     return parsed_url.scheme + '://' + parsed_url.netloc
 
 
-def is_local(url: str, webpage_url: str) -> Literal:
+def is_local(url: str, webpage_url: str) -> bool:
     """Check whether a resource is local or not.
 
     Parameters:

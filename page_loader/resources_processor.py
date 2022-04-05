@@ -4,6 +4,7 @@ import logging
 import os
 import page_loader.io_functions as functions
 import page_loader.url as url_
+from bs4.element import Tag
 from pathlib import Path
 from typing import List
 from progress.bar import IncrementalBar
@@ -14,8 +15,22 @@ TAG_ATTRIBUTE_DICT = {'img': 'src', 'link': 'href', 'script': 'src'}
 TAGS = ('img', 'link')
 
 
+def _get_link(resource: Tag) -> str:
+    """Get link from Tag object.
+
+    Parameters:
+        resource: resource from a webpage.
+
+    Returns:
+        link from tag.
+    """
+    if resource.get('href'):
+        return resource.get('href')
+    return resource.get('src')
+
+
 def _get_resources(
-    resources: List[str],
+    resources: List[Tag],
     url: str,
 ) -> List[str]:
     """Get resource info.
@@ -27,19 +42,18 @@ def _get_resources(
     Returns:
         resources from bs4 and sources of image paths.
     """
-    paths = []
-    for tag in TAGS:
-        for resource in resources:
-            attribute = resource.get(TAG_ATTRIBUTE_DICT[tag])
-            if url_.is_local(attribute, url) and attribute is not None:
-                paths.append(attribute)
+    paths = {}
+    for resource in resources:
+        link = _get_link(resource)
+        if url_.is_local(link, url) and link is not None:
+            paths.update({resource: link})
     return paths
 
 
 def _download_resource(
     url: str,
     path_to_directory: str,
-    resource_paths: list,
+    resource_paths: List[str],
 ) -> List[str]:
     """Download resources from 'image', 'link', 'scripts' tag.
 
@@ -59,13 +73,17 @@ def _download_resource(
         bar_ = IncrementalBar(f'{filename}', max=1, suffix='%(percent)d%%')
         filepath = os.path.join(path_to_directory, filename)
         try:
-            data, flag = url_.get_resource_data(url_core, resource)
-            functions.write_to_file(filepath, data, flag)
+            data = functions.get_resource_data(url_core, resource)
+            functions.write_to_file(filepath, data)
             bar_.next()
         except PermissionError as error1:
             print(f'Access denied to file {filepath}.')
             logging.error('Access denied to file %s.', filepath)
             raise error1
+        except TimeoutError as error3:
+            print('Unable to download a resource %s', resource)
+            logging.error('Unable to download a resource %s', resource)
+            raise error3
         except OSError as error2:
             print(f'Unable to save data to {filepath}.')
             logging.error('Unable to save data to %s.', filepath)
@@ -107,30 +125,32 @@ def _get_resource_name(url: str, resource: str) -> str:
 
 
 def _replace_paths(
-    tag: str,
-    resources: List[str],
+    resource_tags: List[Tag],
     paths: List[str],
     relative_paths: List[str],
 ):
     """Replace paths to resources with their relative paths.
 
     Parameters:
-        tag: 'img' or 'link',
-        resources: bs4-ed resource (image/link/source),
+        resource_tags: tags,
         paths: path to the resource,
         relative_paths: relative paths to the resource.
     """
     path_to_relative_path = dict(zip(paths, relative_paths))
-    for resource in resources:
-        attr = resource.get(TAG_ATTRIBUTE_DICT[tag])
-        if attr in path_to_relative_path:
-            resource[TAG_ATTRIBUTE_DICT[tag]] = \
-                path_to_relative_path[resource[TAG_ATTRIBUTE_DICT[tag]]]
+    for resource in resource_tags:
+        if resource in path_to_relative_path:
+            if resource.get('href'):
+                resource['href'] = path_to_relative_path[resource]
+            else:
+                resource['src'] = path_to_relative_path[resource]
+#        attr = resource.get(TAG_ATTRIBUTE_DICT[tag])
+#        if attr in path_to_relative_path:
+#            resource[TAG_ATTRIBUTE_DICT[tag]] = path_to_relative_path[attr]
 
 
 def process_resources(
     path_to_resources: str,
-    resources: List[str],
+    resource_tags: List[Tag],
     url: str,
 ):
     """
@@ -138,19 +158,17 @@ def process_resources(
 
     Parameters:
         path_to_files: path to a directory with downloaded files,
-        soup: bs4-ed webpage contents,
+        resource_tags: tags,
         url: webpage url.
     """
-    paths = _get_resources(resources, url)
-    for tag in TAGS:
-        relative_paths = _download_resource(
-            url,
-            path_to_resources,
-            paths,
-        )
-        _replace_paths(
-            tag,
-            resources,
-            paths,
-            relative_paths,
-        )
+    paths = _get_resources(resource_tags, url)
+    relative_paths = _download_resource(
+        url,
+        path_to_resources,
+        paths.values(),
+    )
+    _replace_paths(
+        resource_tags,
+        paths,
+        relative_paths,
+    )

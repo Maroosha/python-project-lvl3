@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 TAGS = ('img', 'link', 'script')
 
 
-def download(url: str, directory_path=os.getcwd()) -> str:
+def download(url: str, directory_path: str = os.getcwd()) -> str:
     """Get path to file with a saved webpage.
 
     Parameters:
@@ -21,7 +21,7 @@ def download(url: str, directory_path=os.getcwd()) -> str:
     Returns:
         Path to html file with webpage data.
     """
-    webpage_data = url_.get_webpage_data(url)
+    webpage_data = functions.get_webpage_data(url)
     logging.debug('Webpage contents retrieved.')
     html_filename = url_.get_html_file_name(url)
     html_filepath = os.path.join(directory_path, html_filename)
@@ -46,9 +46,9 @@ def download(url: str, directory_path=os.getcwd()) -> str:
 
     soup = BeautifulSoup(webpage_data, 'html.parser')
     logging.debug('Webpage contents is being parsed...')
-    resources = soup.find_all(TAGS)
+    resource_tags = soup.find_all(TAGS)
     logging.debug('Sources are being downloaded...')
-    resproc.process_resources(path_to_resources, resources, url)
+    resproc.process_resources(path_to_resources, resource_tags, url)
     logging.info('Sources successfully downloaded.')
 
     functions.write_to_file(html_filepath, soup.prettify())
