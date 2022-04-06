@@ -80,14 +80,15 @@ def _download_resource(
             print(f'Access denied to file {filepath}.')
             logging.error('Access denied to file %s.', filepath)
             raise error1
-        except TimeoutError as error3:
-            print('Unable to download a resource %s', resource)
-            logging.error('Unable to download a resource %s', resource)
-            raise error3
         except OSError as error2:
             print(f'Unable to save data to {filepath}.')
             logging.error('Unable to save data to %s.', filepath)
             raise error2
+        except Exception as err:
+            print(f'Unable to download {resource}')
+            logging.info(err)
+            logging.error('Unable to download %s', resource)
+            continue
         relative_path_to_link = (
             f'{url_.get_directory_name(url)}/{filename}'
         )
