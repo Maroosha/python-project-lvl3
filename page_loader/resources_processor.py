@@ -6,7 +6,7 @@ import page_loader.io_functions as functions
 import page_loader.url as url_
 from bs4.element import Tag
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from progress.bar import IncrementalBar
 from urllib.parse import urlparse
 
@@ -32,7 +32,7 @@ def _get_link(resource: Tag) -> str:
 def _get_resources(
     resources: List[Tag],
     url: str,
-) -> List[str]:
+) -> Dict[Tag, str]:
     """Get resource info.
 
     Parameters:
@@ -42,12 +42,12 @@ def _get_resources(
     Returns:
         resources from bs4 and sources of image paths.
     """
-    paths = {}
+    resources_to_links = {}
     for resource in resources:
         link = _get_link(resource)
         if url_.is_local(link, url) and link is not None:
-            paths.update({resource: link})
-    return paths
+            resources_to_links.update({resource: link})
+    return resources_to_links
 
 
 def _download_resource(
@@ -127,7 +127,7 @@ def _get_resource_name(url: str, resource: str) -> str:
 
 def _replace_paths(
     resource_tags: List[Tag],
-    paths: List[str],
+    resources_to_links: Dict[Tag, str],
     relative_paths: List[str],
 ):
     """Replace paths to resources with their relative paths.
@@ -137,16 +137,16 @@ def _replace_paths(
         paths: path to the resource,
         relative_paths: relative paths to the resource.
     """
-    path_to_relative_path = dict(zip(paths, relative_paths))
+    path_to_relative_path = dict(zip(
+        resources_to_links.keys(),
+        relative_paths,
+    ))
     for resource in resource_tags:
         if resource in path_to_relative_path:
             if resource.get('href'):
                 resource['href'] = path_to_relative_path[resource]
             else:
                 resource['src'] = path_to_relative_path[resource]
-#        attr = resource.get(TAG_ATTRIBUTE_DICT[tag])
-#        if attr in path_to_relative_path:
-#            resource[TAG_ATTRIBUTE_DICT[tag]] = path_to_relative_path[attr]
 
 
 def process_resources(
@@ -162,14 +162,14 @@ def process_resources(
         resource_tags: tags,
         url: webpage url.
     """
-    paths = _get_resources(resource_tags, url)
+    resources_to_links = _get_resources(resource_tags, url)
     relative_paths = _download_resource(
         url,
         path_to_resources,
-        paths.values(),
+        resources_to_links.values(),
     )
     _replace_paths(
         resource_tags,
-        paths,
+        resources_to_links,
         relative_paths,
     )
