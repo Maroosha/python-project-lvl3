@@ -13,7 +13,6 @@ from urllib.parse import urlparse
 
 
 TAG_ATTRIBUTE_DICT = {'img': 'src', 'link': 'href', 'script': 'src'}
-TAGS = ('img', 'link')
 
 
 def _get_link(resource: Tag) -> str:
@@ -51,7 +50,7 @@ def _get_resources(
     return tag_to_link
 
 
-def _download_resource(
+def _download_resource(  # noqa C901
     url: str,
     path_to_directory: str,
     resource_paths: List[str],
@@ -78,21 +77,17 @@ def _download_resource(
             functions.write_to_file(filepath, data)
             bar_.next()
         except url_.KnownError:
-            print('An exception has occurred (see logs).')
-            logging.error('KnownError has occurred.')
+            logging.warning('KnownError has occurred.')
             continue
         except PermissionError as error1:
-            print(f'Access denied to file {filepath}.')
             logging.error('Access denied to file %s.', filepath)
             raise error1
         except OSError as error2:
-            print(f'Unable to save data to {filepath}.')
             logging.error('Unable to save data to %s.', filepath)
             raise error2
         except requests.RequestException as err:
-            print(f'Unable to process {resource}')
             logging.info(err)
-            logging.error('Unable to process %s', resource)
+            logging.warning('Unable to process %s', resource)
             continue
         relative_path_to_link = (
             f'{url_.get_directory_name(url)}/{filename}'
@@ -114,7 +109,7 @@ def _get_resource_name(url: str, resource: str) -> str:
         name of the resource.
     """
     resource_parse = urlparse(resource)
-    if Path(resource).suffix:  # link = '/assets/professions/nodejs.png'
+    if Path(resource).suffix:
         src = resource[:-len(Path(resource).suffix)]
         suffix = Path(resource).suffix
     else:  # src = '/assets/professions/nodejs'
@@ -122,10 +117,10 @@ def _get_resource_name(url: str, resource: str) -> str:
         suffix = '.html'
     if resource_parse.scheme:
         src = src[len(resource_parse.scheme) + 3:]
-        name = url_.hyphenate(src)  # -assets-professions-nodejs
+        name = url_.hyphenate(src)
         resource_name = name + suffix
     else:
-        name = url_.hyphenate(src)  # -assets-professions-nodejs
+        name = url_.hyphenate(src)
         resource_name = url_.get_website_name(url) + name + suffix
     return resource_name
 
@@ -140,7 +135,7 @@ def _replace_paths(
         tag_to_link: path to the resource,
         relative_paths: relative paths to the resource.
     """
-    for tag, local_file_link in zip(tag_to_link, relative_paths):
+    for tag, local_file_link in zip(tag_to_link.keys(), relative_paths):
         tag[TAG_ATTRIBUTE_DICT[tag.name]] = local_file_link
 
 

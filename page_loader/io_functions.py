@@ -2,9 +2,8 @@
 
 import logging
 import requests
-from page_loader.url import KnownError
+import page_loader.url as url_
 from typing import Union
-from urllib.parse import urlparse
 
 
 def write_to_file(filepath: str, data: Union[bytes, str]):
@@ -14,19 +13,14 @@ def write_to_file(filepath: str, data: Union[bytes, str]):
         filepath: path to file,
         data: data to be written to file.
     """
+    format = 'wb+' if isinstance(data, bytes) else 'w'
     try:
-        if isinstance(data, bytes):
-            with open(filepath, 'wb+') as file_:
-                file_.write(data)
-        else:
-            with open(filepath, 'w') as file_:
-                file_.write(data)
+        with open(filepath, format) as file_:
+            file_.write(data)
     except PermissionError as error1:
-        print(f'Access denied to file {filepath}.')
         logging.error('Access denied to file %s.', filepath)
         raise error1
     except OSError as error2:
-        print(f'Unable to write to file {filepath}.')
         logging.error('Unable to write to file %s.', filepath)
         raise error2
 
@@ -45,9 +39,9 @@ def get_webpage_data(url: str) -> str:
         request.raise_for_status()
     except requests.exceptions.HTTPError as exc:
         logging.error(exc)
-        raise KnownError(f"Connection failed. \
+        raise url_.KnownError(f"Connection failed. \
 Status code: {requests.get(url).status_code}") from exc
-    return request.text
+    return request.content
 
 
 def get_resource_data(
@@ -63,9 +57,5 @@ def get_resource_data(
     Returns:
         data from a resource.
     """
-    resource_parse = urlparse(resource)
-    if resource_parse.netloc:
-        data = get_webpage_data(resource)
-    else:
-        data = requests.get(url + resource).content
-    return data
+    link = url_.to_absolute(url, resource)
+    return get_webpage_data(link)

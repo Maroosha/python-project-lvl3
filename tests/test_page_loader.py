@@ -34,6 +34,7 @@ CODES = [403, 404, 500]
 ERRORS = [
     requests.exceptions.HTTPError,
     requests.exceptions.Timeout,
+    requests.exceptions.RequestException,
 ]
 downloaded_files = [
     (HTML_FIXTURE, DOWNLOADED_WEBSITE),
@@ -96,15 +97,6 @@ def test_download(received, expected, tmp_path, requests_mock):
     assert read_file(received_png, 'rb') == read_file(IMAGE_FIXTURE, 'rb')
 
 
-def test_for_permission_error(requests_mock):
-    'Test for permission error.'
-    requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
-    webpage_data = get_webpage_data(URL)
-    filepath = '/some_filepath'
-    with pytest.raises(PermissionError):
-        write_to_file(filepath, webpage_data)
-
-
 @pytest.mark.parametrize('error', ERRORS)
 def test_for_http_error(error, requests_mock, tmp_path):
     "Test for errors."
@@ -120,3 +112,12 @@ def test_repsonse_with_error(requests_mock, code, tmp_path):
     requests_mock.get(url, status_code=code)
     with pytest.raises(Exception):
         assert download(url, tmp_path)
+
+
+def test_for_permission_error(requests_mock):
+    'Test for permission error.'
+    requests_mock.get(URL, text=read_file(WEBPAGE_SOURCE))
+    webpage_data = get_webpage_data(URL)
+    filepath = '/some_filepath'
+    with pytest.raises(PermissionError):
+        write_to_file(filepath, webpage_data)

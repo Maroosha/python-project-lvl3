@@ -32,11 +32,9 @@ def download(url: str, directory_path: str = os.getcwd()) -> str:
     try:
         os.mkdir(path_to_resources)
     except FileNotFoundError as not_found:
-        print(f'No such file or directory: {path_to_resources}')
         logging.exception('No such file or directory: %s', path_to_resources)
         raise not_found
     except OSError as err:
-        print(f'Directory {path_to_resources} already exists.')
         logging.exception(
             'Directory %s since exists.',
             path_to_resources,
