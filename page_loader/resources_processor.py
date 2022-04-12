@@ -4,6 +4,7 @@ import logging
 import os
 import page_loader.io_functions as functions
 import page_loader.url as url_
+import requests
 from bs4.element import Tag
 from pathlib import Path
 from typing import List, Dict
@@ -42,12 +43,12 @@ def _get_resources(
     Returns:
         resources from bs4 and sources of image paths.
     """
-    resources_to_links = {}
+    tag_to_link = {}
     for resource in resources:
         link = _get_link(resource)
         if url_.is_local(link, url) and link is not None:
-            resources_to_links.update({resource: link})
-    return resources_to_links
+            tag_to_link.update({resource: link})
+    return tag_to_link
 
 
 def _download_resource(
@@ -76,6 +77,10 @@ def _download_resource(
             data = functions.get_resource_data(url_core, resource)
             functions.write_to_file(filepath, data)
             bar_.next()
+        except url_.KnownError:
+            print(f'An exception has occurred (see logs).')
+            logging.error('KnownError has occurred.')
+            continue
         except PermissionError as error1:
             print(f'Access denied to file {filepath}.')
             logging.error('Access denied to file %s.', filepath)
@@ -84,10 +89,10 @@ def _download_resource(
             print(f'Unable to save data to {filepath}.')
             logging.error('Unable to save data to %s.', filepath)
             raise error2
-        except Exception as err:
-            print(f'Unable to download {resource}')
+        except requests.RequestException as err:
+            print(f'Unable to process {resource}')
             logging.info(err)
-            logging.error('Unable to download %s', resource)
+            logging.error('Unable to process %s', resource)
             continue
         relative_path_to_link = (
             f'{url_.get_directory_name(url)}/{filename}'
@@ -126,27 +131,17 @@ def _get_resource_name(url: str, resource: str) -> str:
 
 
 def _replace_paths(
-    resource_tags: List[Tag],
-    resources_to_links: Dict[Tag, str],
+    tag_to_link: Dict[Tag, str],
     relative_paths: List[str],
 ):
     """Replace paths to resources with their relative paths.
 
     Parameters:
-        resource_tags: tags,
-        paths: path to the resource,
+        tag_to_link: path to the resource,
         relative_paths: relative paths to the resource.
     """
-    path_to_relative_path = dict(zip(
-        resources_to_links.keys(),
-        relative_paths,
-    ))
-    for resource in resource_tags:
-        if resource in path_to_relative_path:
-            if resource.get('href'):
-                resource['href'] = path_to_relative_path[resource]
-            else:
-                resource['src'] = path_to_relative_path[resource]
+    for tag, local_file_link in zip(tag_to_link, relative_paths):
+        tag[TAG_ATTRIBUTE_DICT[tag.name]] = local_file_link
 
 
 def process_resources(
@@ -162,14 +157,13 @@ def process_resources(
         resource_tags: tags,
         url: webpage url.
     """
-    resources_to_links = _get_resources(resource_tags, url)
+    tag_to_link = _get_resources(resource_tags, url)
     relative_paths = _download_resource(
         url,
         path_to_resources,
-        resources_to_links.values(),
+        tag_to_link.values(),
     )
     _replace_paths(
-        resource_tags,
-        resources_to_links,
+        tag_to_link,
         relative_paths,
     )
