@@ -78,7 +78,7 @@ def _download_resource(
             functions.write_to_file(filepath, data)
             bar_.next()
         except url_.KnownError:
-            print(f'An exception has occurred (see logs).')
+            print('An exception has occurred (see logs).')
             logging.error('KnownError has occurred.')
             continue
         except PermissionError as error1:
